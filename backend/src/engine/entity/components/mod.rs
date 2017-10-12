@@ -1,6 +1,6 @@
 use engine::Pos;
 
-#[derive(Debug,Hash,Copy,Clone,Serialize,Deserialize,Eq,PartialEq)]
+#[derive(Debug, Hash, Copy, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub enum ComponentType {
     Pos,
     GroundCollider,
