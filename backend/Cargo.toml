@@ -12,3 +12,4 @@ rlua  = "0.9"
 serde = "1"
 serde_derive = "1"
 ndarray = {version="0.10", features=["serde-1"]}
+rand = "0.3"
