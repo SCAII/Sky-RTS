@@ -4,7 +4,7 @@ pub enum Shape {
     Triangle { base_len: f64 },
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct Color {
     pub r: u8,
     pub g: u8,

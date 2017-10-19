@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 extern crate ndarray;
 extern crate rand;
 extern crate rlua;
@@ -10,14 +12,12 @@ mod engine;
 
 use engine::Rts;
 
-use scaii_defs::{Backend, BackendSupported, Module, SerializationStyle};
+use scaii_defs::{BackendSupported, Module, SerializationStyle};
 use scaii_defs::protos::{MultiMessage, ScaiiPacket};
 
 use std::error::Error;
 
-const SUPPORTED: BackendSupported = BackendSupported {
-    serialization: SerializationStyle::None,
-};
+const SUPPORTED: BackendSupported = BackendSupported { serialization: SerializationStyle::None };
 
 struct Context {
     rts: Rts,
@@ -33,40 +33,37 @@ impl Module for Context {
 
     fn get_messages(&mut self) -> MultiMessage {
         use scaii_defs;
-        use std::mem;
 
-        scaii_defs::protos::merge_multi_messages(mem::replace(&mut self.awaiting_msgs, Vec::new()))
-            .unwrap_or(MultiMessage {
-                packets: Vec::new(),
-            })
+        scaii_defs::protos::merge_multi_messages(self.awaiting_msgs.drain(..).collect())
+            .unwrap_or(MultiMessage { packets: Vec::new() })
     }
 }
 
-impl Backend for Context {
-    fn supported_behavior(&self) -> BackendSupported {
-        SUPPORTED
-    }
-}
+// impl Backend for Context {
+//     fn supported_behavior(&self) -> BackendSupported {
+//         SUPPORTED
+//     }
+// }
 
-#[no_mangle]
-pub fn new() -> Box<Module> {
-    let (rts, msgs) = Rts::rand_new();
-    Box::new(Context {
-        rts: rts,
-        awaiting_msgs: vec![msgs],
-    })
-}
+// #[no_mangle]
+// pub fn new() -> Box<Module> {
+//     let (rts, msgs) = Rts::new();
+//     Box::new(Context {
+//         rts: rts,
+//         awaiting_msgs: vec![msgs],
+//     })
+// }
 
-#[no_mangle]
-pub fn supported_behavior() -> BackendSupported {
-    SUPPORTED
-}
+// #[no_mangle]
+// pub fn supported_behavior() -> BackendSupported {
+//     SUPPORTED
+// }
 
-#[no_mangle]
-pub fn new_backend() -> Box<Backend> {
-    let (rts, msgs) = Rts::rand_new();
-    Box::new(Context {
-        rts: rts,
-        awaiting_msgs: vec![msgs],
-    })
-}
+// #[no_mangle]
+// pub fn new_backend() -> Box<Backend> {
+//     let (rts, msgs) = Rts::new();
+//     Box::new(Context {
+//         rts: rts,
+//         awaiting_msgs: vec![msgs],
+//     })
+// }
