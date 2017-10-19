@@ -10,6 +10,8 @@ pub enum ComponentType {
     Renderable,
 }
 
+pub type Movement = Pos;
+
 #[derive(Debug, Copy, Clone, Serialize, Deserialize, Default)]
 pub struct Pos {
     pub x: f64,
@@ -28,7 +30,9 @@ impl Default for Renderable {
     fn default() -> Self {
         Renderable {
             pos: Pos::default(),
-            shape: Shape::Triangle { base_len: Default::default() },
+            shape: Shape::Triangle {
+                base_len: Default::default(),
+            },
             color: Color::default(),
         }
     }

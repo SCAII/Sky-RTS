@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
-use engine::entity::components::Pos;
+use engine::entity::components;
 use engine::entity::EntityId;
 use super::System;
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct MoveUpdate {
+pub struct Update {
     pub delta_x: f64,
     pub delta_y: f64,
     pub speed: f64,
@@ -21,25 +21,25 @@ pub struct MoveResult {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Movement {
-    pos_components: BTreeMap<EntityId, Pos>,
-    partial_updates: BTreeMap<EntityId, MoveUpdate>,
+    move_components: BTreeMap<EntityId, components::Movement>,
+    partial_updates: BTreeMap<EntityId, Update>,
 }
 
 impl Movement {
     pub fn new() -> Self {
         Movement {
-            pos_components: BTreeMap::new(),
+            move_components: BTreeMap::new(),
             partial_updates: BTreeMap::new(),
         }
     }
 }
 
 impl System for Movement {
-    type Update = Vec<MoveUpdate>;
+    type Update = Vec<Update>;
     type Result = Vec<MoveResult>;
-    type Component = Pos;
+    type Component = components::Movement;
 
-    fn update(&mut self, updates: Vec<MoveUpdate>, delta_t: f64) -> Vec<MoveResult> {
+    fn update(&mut self, updates: Vec<Update>, delta_t: f64) -> Vec<MoveResult> {
         for update in updates {
             // Just throw away old updates if we get new info
             self.partial_updates.insert(update.e_id, update);
@@ -50,10 +50,10 @@ impl System for Movement {
         let mut finished_updates = Vec::new();
 
         for update in self.partial_updates.values_mut() {
-            let pos = self.pos_components.get_mut(&update.e_id).expect(&format!(
-                "Movement events should only be \
+            let pos = self.move_components.get_mut(&update.e_id).expect(&format!(
+                "ment events should only be \
                  generated for physical objects with a Pos component. Got ID: {}\n\
-                 Note: movement update as a whole was {:?}",
+                 Note: ment update as a whole was {:?}",
                 update.e_id,
                 update
             ));
@@ -80,16 +80,16 @@ impl System for Movement {
         results
     }
 
-    fn add_component(&mut self, e_id: EntityId, component: Pos) {
-        self.pos_components.insert(e_id, component);
+    fn add_component(&mut self, e_id: EntityId, component: components::Movement) {
+        self.move_components.insert(e_id, component);
     }
 
     fn remove_entity(&mut self, e_id: EntityId) {
-        self.pos_components.remove(&e_id);
+        self.move_components.remove(&e_id);
         self.partial_updates.remove(&e_id);
     }
 
     fn component_map(&self) -> &BTreeMap<EntityId, Self::Component> {
-        &self.pos_components
+        &self.move_components
     }
 }
