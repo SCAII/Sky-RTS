@@ -3,7 +3,6 @@ mod graphics;
 mod system;
 
 use scaii_defs::protos::MultiMessage;
-use scaii_defs::protos;
 
 use self::system::{Movement, Render};
 use self::system::movement::MoveResult;
@@ -18,7 +17,6 @@ pub struct Rts {
 
     /* The result fields are just caches to avoid memory allocation
     so we don't need to serialize them */
-    #[serde(skip)] render_result: Option<Vec<protos::Entity>>,
     #[serde(skip)] move_result: Option<Vec<MoveResult>>,
 
     id_manager: IdManager,
@@ -31,7 +29,6 @@ impl Rts {
             render_system: Render::new(),
             movement_system: Movement::new(),
 
-            render_result: None,
             move_result: None,
 
             id_manager: IdManager::new(),
@@ -52,13 +49,10 @@ impl Rts {
             mem::replace(&mut self.move_result, None),
         );
 
-        let entities = self.render_system.update(
-            &mut move_result,
-            SECONDS_PER_FRAME,
-            mem::replace(&mut self.render_result, None),
-        );
+        let entities = self.render_system
+            .update(&mut move_result, SECONDS_PER_FRAME, None);
 
-        self.render_result = Some(entities.clone());
+        move_result.clear();
         self.move_result = Some(move_result);
 
         let packet = Viz { entities: entities };

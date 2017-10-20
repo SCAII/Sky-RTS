@@ -16,7 +16,7 @@ pub trait System {
         &mut self,
         updates: &mut [Self::Update],
         delta_t: f64,
-        prev_result: Option<Self::Result>,
+        result_cache: Option<Self::Result>,
     ) -> Self::Result;
 
     fn add_component(&mut self, e_id: EntityId, component: Self::Component);

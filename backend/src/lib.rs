@@ -10,6 +10,7 @@ extern crate serde;
 extern crate serde_derive;
 
 mod engine;
+pub(crate) mod util;
 
 use engine::Rts;
 
@@ -25,6 +26,12 @@ const SUPPORTED: BackendSupported = BackendSupported {
 pub struct Context {
     rts: Rts,
     awaiting_msgs: Vec<MultiMessage>,
+}
+
+impl Context {
+    fn diverge(&mut self) {
+        unimplemented!("We don't have an RNG yet so we can't reseed and diverge")
+    }
 }
 
 impl Module for Context {
@@ -74,33 +81,35 @@ impl Backend for Context {
     }
 
     fn serialize_diverging(&mut self, into: Option<Vec<u8>>) -> Result<Vec<u8>, Box<Error>> {
-        self.serialize(into)
+        let out = self.serialize(into);
+        self.diverge();
+        out
     }
 
     fn deserialize_diverging(&mut self, buf: &[u8]) -> Result<(), Box<Error>> {
-        self.deserialize(buf)
+        let out = self.deserialize(buf);
+        self.diverge();
+        out
     }
 }
 
-// #[no_mangle]
-// pub fn new() -> Box<Module> {
-//     let (rts, msgs) = Rts::new();
-//     Box::new(Context {
-//         rts: rts,
-//         awaiting_msgs: vec![msgs],
-//     })
-// }
+#[no_mangle]
+pub fn new() -> Box<Module> {
+    Box::new(Context {
+        rts: Rts::new(),
+        awaiting_msgs: vec![],
+    })
+}
 
 #[no_mangle]
 pub fn supported_behavior() -> BackendSupported {
     SUPPORTED
 }
 
-// #[no_mangle]
-// pub fn new_backend() -> Box<Backend> {
-//     let (rts, msgs) = Rts::new();
-//     Box::new(Context {
-//         rts: rts,
-//         awaiting_msgs: vec![msgs],
-//     })
-// }
+#[no_mangle]
+pub fn new_backend() -> Box<Backend> {
+    Box::new(Context {
+        rts: Rts::new(),
+        awaiting_msgs: vec![],
+    })
+}
