@@ -13,7 +13,7 @@ package scaii.rts;
 // the later one will take precedence.
 //
 // Not every unit needs an action, if one
-// is missing, it is assumed "keep doing what
+// is missing, it is assumed to "keep doing what
 // it's doing" (finish moving to a location,
 // wait for enemies to enter engagement radius,
 // etc).
