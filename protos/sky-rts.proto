@@ -103,3 +103,31 @@ message DeltaPos {
     optional double x = 1;
     optional double y = 2;
 }
+
+// RTS-specific configuration
+message Config {
+    optional Scenario scenario = 1;
+    optional bool emit_viz = 2;
+    optional Seed random_seed = 3;
+}
+
+// The seed to use to initialize the
+// RTS' RNG.
+//
+// When no seed is given, it will be initialized
+// based on OS-specific methods of generating
+// randomness.
+message Seed {
+    repeated uint64 seed = 1;
+}
+
+// Which scenario we'll be playing
+message Scenario {
+    oneof to_run {
+        BasicSkirmish skirmish = 1;
+    }
+}
+
+// A 5v5 skirmish with built-in units
+// and simple AI
+message BasicSkirmish {}
