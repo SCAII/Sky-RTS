@@ -22,12 +22,22 @@ impl Render {
 }
 
 impl System for Render {
-    type Update = Vec<RenderUpdate>;
+    type Update = RenderUpdate;
     type Result = Vec<protos::Entity>;
     type Component = Renderable;
 
-    fn update(&mut self, updates: Vec<RenderUpdate>, _: f64) -> Vec<protos::Entity> {
-        let mut viz_msgs = Vec::new();
+    fn update(
+        &mut self,
+        updates: &mut [RenderUpdate],
+        _: f64,
+        prev_result: Option<Vec<protos::Entity>>,
+    ) -> Vec<protos::Entity> {
+        let mut viz_msgs = prev_result
+            .map(|mut v| {
+                v.clear();
+                v
+            })
+            .unwrap_or(Vec::new());
 
         for update in updates {
             let component = self.draw_components.get_mut(&update.e_id).expect(&format!(

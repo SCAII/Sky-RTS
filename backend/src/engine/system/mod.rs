@@ -12,7 +12,12 @@ pub trait System {
     type Result;
     type Component;
 
-    fn update(&mut self, updates: Self::Update, delta_t: f64) -> Self::Result;
+    fn update(
+        &mut self,
+        updates: &mut [Self::Update],
+        delta_t: f64,
+        prev_result: Option<Self::Result>,
+    ) -> Self::Result;
 
     fn add_component(&mut self, e_id: EntityId, component: Self::Component);
 

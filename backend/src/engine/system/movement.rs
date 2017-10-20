@@ -4,7 +4,7 @@ use engine::entity::EntityId;
 use super::System;
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Update {
+pub struct MoveUpdate {
     pub delta_x: f64,
     pub delta_y: f64,
     pub speed: f64,
@@ -22,7 +22,7 @@ pub struct MoveResult {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Movement {
     move_components: BTreeMap<EntityId, components::Movement>,
-    partial_updates: BTreeMap<EntityId, Update>,
+    partial_updates: BTreeMap<EntityId, MoveUpdate>,
 }
 
 impl Movement {
@@ -35,23 +35,33 @@ impl Movement {
 }
 
 impl System for Movement {
-    type Update = Vec<Update>;
+    type Update = MoveUpdate;
     type Result = Vec<MoveResult>;
     type Component = components::Movement;
 
-    fn update(&mut self, updates: Vec<Update>, delta_t: f64) -> Vec<MoveResult> {
+    fn update(
+        &mut self,
+        updates: &mut [MoveUpdate],
+        delta_t: f64,
+        prev_result: Option<Vec<MoveResult>>,
+    ) -> Vec<MoveResult> {
         for update in updates {
             // Just throw away old updates if we get new info
-            self.partial_updates.insert(update.e_id, update);
+            self.partial_updates.insert(update.e_id, *update);
         }
 
-        let mut results = Vec::with_capacity(self.partial_updates.len());
+        let mut results = prev_result
+            .map(|mut v| {
+                v.clear();
+                v
+            })
+            .unwrap_or_else(|| Vec::with_capacity(self.partial_updates.len()));
 
         let mut finished_updates = Vec::new();
 
         for update in self.partial_updates.values_mut() {
             let pos = self.move_components.get_mut(&update.e_id).expect(&format!(
-                "ment events should only be \
+                "Movement events should only be \
                  generated for physical objects with a Pos component. Got ID: {}\n\
                  Note: ment update as a whole was {:?}",
                 update.e_id,
