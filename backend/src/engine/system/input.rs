@@ -1,5 +1,6 @@
 use engine::system::System;
 use scaii_defs::protos::Action;
+use protos::{ActionList, UnitAction};
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ActionStyle {
@@ -23,3 +24,20 @@ pub struct InputSystem {
 
 //     }
 // }
+
+
+fn action_to_unit_actions(action: Action) -> ActionList {
+    use prost::Message;
+    let msg = action
+        .alternate_actions
+        .expect("Only action lists are supported right now");
+
+    if msg.len() == 0 {
+        return ActionList {
+            actions: Vec::new(),
+        };
+    }
+
+
+    ActionList::decode(msg).expect("Only action lists are supported right now")
+}

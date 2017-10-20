@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 
 extern crate bincode;
+extern crate bytes;
 extern crate ndarray;
+extern crate prost;
 #[macro_use]
 extern crate prost_derive;
 extern crate rand;
