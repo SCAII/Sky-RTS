@@ -50,12 +50,8 @@ impl System for Movement {
             self.partial_updates.insert(update.e_id, *update);
         }
 
-        let mut results = prev_result
-            .map(|mut v| {
-                v.clear();
-                v
-            })
-            .unwrap_or_else(|| Vec::with_capacity(self.partial_updates.len()));
+        let mut results =
+            prev_result.unwrap_or_else(|| Vec::with_capacity(self.partial_updates.len()));
 
         let mut finished_updates = Vec::new();
 

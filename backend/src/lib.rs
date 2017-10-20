@@ -2,6 +2,8 @@
 
 extern crate bincode;
 extern crate ndarray;
+#[macro_use]
+extern crate prost_derive;
 extern crate rand;
 extern crate rlua;
 extern crate scaii_defs;
@@ -11,6 +13,7 @@ extern crate serde_derive;
 
 mod engine;
 pub(crate) mod util;
+pub mod protos;
 
 use engine::Rts;
 

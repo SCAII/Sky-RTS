@@ -32,12 +32,7 @@ impl System for Render {
         _: f64,
         prev_result: Option<Vec<protos::Entity>>,
     ) -> Vec<protos::Entity> {
-        let mut viz_msgs = prev_result
-            .map(|mut v| {
-                v.clear();
-                v
-            })
-            .unwrap_or_else(Vec::new);
+        let mut viz_msgs = prev_result.unwrap_or_else(Vec::new);
 
         for update in updates {
             let component = self.draw_components.get_mut(&update.e_id).expect(&format!(

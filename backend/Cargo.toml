@@ -16,3 +16,11 @@ rand = "0.3"
 lifeguard = "0.5"
 lazy_static = "0.2"
 bincode = "0.9"
+
+prost = "0.2"
+prost-derive = "0.2"
+bytes = "0.4.5"
+
+[build-dependencies]
+prost-build = "0.2"
+glob = "0.2.11"

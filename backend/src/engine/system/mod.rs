@@ -3,6 +3,7 @@ use engine::entity::EntityId;
 
 pub mod movement;
 pub mod render;
+pub mod input;
 
 pub use self::movement::*;
 pub use self::render::*;
