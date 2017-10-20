@@ -7,15 +7,21 @@ use scaii_defs::protos;
 
 use self::system::{Movement, Render};
 use self::system::movement::MoveResult;
+use self::entity::IdManager;
 
 const SECONDS_PER_FRAME: f64 = 1.0 / 60.0;
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Rts {
     render_system: Render,
     movement_system: Movement,
 
-    render_result: Option<Vec<protos::Entity>>,
-    move_result: Option<Vec<MoveResult>>,
+    /* The result fields are just caches to avoid memory allocation
+    so we don't need to serialize them */
+    #[serde(skip)] render_result: Option<Vec<protos::Entity>>,
+    #[serde(skip)] move_result: Option<Vec<MoveResult>>,
+
+    id_manager: IdManager,
 }
 
 
@@ -27,6 +33,8 @@ impl Rts {
 
             render_result: None,
             move_result: None,
+
+            id_manager: IdManager::new(),
         }
     }
 

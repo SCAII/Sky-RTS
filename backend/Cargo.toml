@@ -15,3 +15,4 @@ ndarray = {version="0.10", features=["serde-1"]}
 rand = "0.3"
 lifeguard = "0.5"
 lazy_static = "0.2"
+bincode = "0.9"

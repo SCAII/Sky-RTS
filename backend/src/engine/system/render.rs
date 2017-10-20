@@ -37,7 +37,7 @@ impl System for Render {
                 v.clear();
                 v
             })
-            .unwrap_or(Vec::new());
+            .unwrap_or_else(Vec::new);
 
         for update in updates {
             let component = self.draw_components.get_mut(&update.e_id).expect(&format!(
