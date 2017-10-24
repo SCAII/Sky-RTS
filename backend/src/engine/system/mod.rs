@@ -4,9 +4,12 @@ use engine::entity::EntityId;
 pub mod movement;
 pub mod render;
 pub mod input;
+pub mod trigger;
 
 pub use self::movement::*;
 pub use self::render::*;
+pub use self::input::*;
+pub use self::trigger::*;
 
 pub trait System {
     type Update;

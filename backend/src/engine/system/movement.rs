@@ -5,8 +5,8 @@ use super::System;
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MoveUpdate {
-    pub delta_x: f64,
-    pub delta_y: f64,
+    pub new_x: f64,
+    pub new_y: f64,
     pub speed: f64,
     pub e_id: EntityId,
 }
@@ -64,23 +64,37 @@ impl System for Movement {
                 update
             ));
 
-            let delta_x = update.delta_x * delta_t;
-            let delta_y = update.delta_y * delta_t;
+            let delta_x = (update.new_x - pos.x) * update.speed * delta_t;
+            let delta_y = (update.new_y - pos.y) * update.speed * delta_t;
 
-            update.delta_x = (update.delta_x - delta_x).max(0.0);
-            update.delta_y = (update.delta_y - delta_y).max(0.0);
-            if update.delta_x == 0.0 && update.delta_y == 0.0 {
-                finished_updates.push(update.e_id);
+            let mut new_x = pos.x + delta_x;
+            let mut new_y = pos.y + delta_y;
+
+            // overshoot detection
+            if (new_x - update.new_x).signum() != (pos.x - update.new_x).signum() {
+                new_x = update.new_x;
             }
 
-            pos.x += delta_x;
-            pos.y += delta_y;
+            if (new_y - update.new_y).signum() != (pos.y - update.new_y).signum() {
+                new_y = update.new_y;
+            }
+
+            pos.x = new_x;
+            pos.y = new_y;
+
+            if pos.x == update.new_x && pos.y == update.new_y {
+                finished_updates.push(update.e_id);
+            }
 
             results.push(MoveResult {
                 new_x: if delta_x == 0.0 { Some(pos.x) } else { None },
                 new_y: if delta_y == 0.0 { Some(pos.y) } else { None },
                 e_id: update.e_id,
             });
+        }
+
+        for id in finished_updates {
+            self.move_components.remove(&id);
         }
 
         results
@@ -98,4 +112,8 @@ impl System for Movement {
     fn component_map(&self) -> &BTreeMap<EntityId, Self::Component> {
         &self.move_components
     }
+}
+
+fn float_cmp(a: f64, b: f64, thresh: f64) -> bool {
+    (a-b).abs() <= thresh
 }

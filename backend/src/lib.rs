@@ -2,6 +2,8 @@
 
 extern crate bincode;
 extern crate bytes;
+#[macro_use]
+extern crate lazy_static;
 extern crate ndarray;
 extern crate prost;
 #[macro_use]
@@ -13,7 +15,7 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-mod engine;
+pub mod engine;
 pub(crate) mod util;
 pub mod protos;
 
@@ -40,8 +42,14 @@ impl Context {
 }
 
 impl Module for Context {
-    fn process_msg(&mut self, _: &ScaiiPacket) -> Result<(), Box<Error>> {
-        self.awaiting_msgs.push(self.rts.update());
+    fn process_msg(&mut self, packet: &ScaiiPacket) -> Result<(), Box<Error>> {
+        use scaii_defs::protos::scaii_packet::SpecificMsg;
+        match packet.specific_msg {
+            Some(SpecificMsg::Action(ref action)) => {
+                self.awaiting_msgs.push(self.rts.update(Some(action)).0)
+            },
+            _ => { self.awaiting_msgs.push(self.rts.update(None).0);}
+        }
 
         Ok(())
     }
