@@ -45,7 +45,7 @@ fn two_towers(render_sys: &mut Render, move_sys: &mut Movement) -> (VizInit, Viz
                 g: 0,
                 a: 255,
             },
-            shape: Shape::Triangle { base_len: 2.5 },
+            shape: Shape::Triangle { base_len: 10.0 },
         },
     );
 
@@ -70,7 +70,7 @@ fn two_towers(render_sys: &mut Render, move_sys: &mut Movement) -> (VizInit, Viz
                 }),
                 rect: None,
                 triangle: Some(protos::Triangle {
-                    base_len: Some(2.5),
+                    base_len: Some(10.0),
                 }),
                 delete: false,
             },
