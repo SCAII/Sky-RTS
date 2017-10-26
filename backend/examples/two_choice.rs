@@ -28,8 +28,6 @@ fn main() {
     let mut rts = backend::engine::Rts::new();
     let multi_msg = rts.restart();
 
-    println!("{:?}", multi_msg);
-
     let mut conn = connect();
     server_startup(&mut conn, &multi_msg.packets[0]);
 
