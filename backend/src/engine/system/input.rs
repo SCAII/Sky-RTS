@@ -60,10 +60,10 @@ impl System for InputSystem {
         for action in actions.actions {
             let id = action.unit_id;
             match action.action {
-                Some(unit_action::Action::MoveTo (MoveTo{ pos })) => {
+                Some(unit_action::Action::MoveTo(MoveTo { pos })) => {
                     out.push(RtsCommand::SimpleMove(MoveUpdate {
                         e_id: id as usize,
-                        speed: 1.0,
+                        speed: 30.0,
                         new_x: pos.x,
                         new_y: pos.y,
                     }))

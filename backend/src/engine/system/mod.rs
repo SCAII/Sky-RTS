@@ -5,6 +5,7 @@ pub mod movement;
 pub mod render;
 pub mod input;
 pub mod trigger;
+pub mod init;
 
 pub use self::movement::*;
 pub use self::render::*;
@@ -13,7 +14,7 @@ pub use self::trigger::*;
 
 pub trait System {
     type Update;
-    type Result;
+    type Result: Sized;
     type Component;
 
     fn update(

@@ -64,8 +64,8 @@ impl System for Movement {
                 update
             ));
 
-            let delta_x = (update.new_x - pos.x) * update.speed * delta_t;
-            let delta_y = (update.new_y - pos.y) * update.speed * delta_t;
+            let delta_x = (update.new_x - pos.x) / (update.new_x - pos.x) * update.speed * delta_t;
+            let delta_y = (update.new_y - pos.y) / (update.new_y - pos.y) * update.speed * delta_t;
 
             let mut new_x = pos.x + delta_x;
             let mut new_y = pos.y + delta_y;
@@ -87,8 +87,8 @@ impl System for Movement {
             }
 
             results.push(MoveResult {
-                new_x: if delta_x == 0.0 { Some(pos.x) } else { None },
-                new_y: if delta_y == 0.0 { Some(pos.y) } else { None },
+                new_x: if delta_x != 0.0 { Some(pos.x) } else { None },
+                new_y: if delta_y != 0.0 { Some(pos.y) } else { None },
                 e_id: update.e_id,
             });
         }
@@ -115,5 +115,5 @@ impl System for Movement {
 }
 
 fn float_cmp(a: f64, b: f64, thresh: f64) -> bool {
-    (a-b).abs() <= thresh
+    (a - b).abs() <= thresh
 }

@@ -1,12 +1,12 @@
 extern crate backend;
-extern crate scaii_defs;
-extern crate websocket;
 extern crate prost;
 extern crate rand;
+extern crate scaii_defs;
+extern crate websocket;
 
 use std::error::Error;
 
-use scaii_defs::protos::ScaiiPacket;
+use scaii_defs::protos::{ScaiiPacket, VizInit};
 
 use websocket::client::sync::Client;
 use websocket::stream::sync::TcpStream;
@@ -25,33 +25,48 @@ fn main() {
 
     use prost::Message;
 
-    let mut conn = connect();
-    server_startup(&mut conn);
-
     let mut rts = backend::engine::Rts::new();
-    rts.two_setup();
+    let multi_msg = rts.restart();
+
+    println!("{:?}", multi_msg);
+
+    let mut conn = connect();
+    server_startup(&mut conn, &multi_msg.packets[0]);
+
+    // Send initial viz keyframe
+    encode_and_send_proto(&mut conn, &multi_msg.packets[1]);
+    receive_and_decode_proto(&mut conn);
 
     let sleep_time = Duration::from_millis(17);
 
     let mut rng = rand::thread_rng();
 
-    let action: usize = rng.gen_range(1,3);
+    let action: usize = rng.gen_range(1, 3);
     // println!("{:?}", rts.movement_system.component_map());
-    let choice = rts.movement_system.component_map().get(&action).unwrap().clone();
+    let choice = rts.movement_system
+        .component_map()
+        .get(&action)
+        .unwrap()
+        .clone();
 
     let rts_action = protos::ActionList {
         actions: vec![
             protos::UnitAction {
                 unit_id: 0,
-                action: Some(MoveTo(protos::MoveTo { pos: protos::Pos{x: choice.x, y: choice.y}})),
-            }
-        ]
+                action: Some(MoveTo(protos::MoveTo {
+                    pos: protos::Pos {
+                        x: choice.x,
+                        y: choice.y,
+                    },
+                })),
+            },
+        ],
     };
 
     let mut buf: Vec<u8> = Vec::new();
-    rts_action.encode(&mut buf).expect(
-        "Could not encode action"
-    );
+    rts_action
+        .encode(&mut buf)
+        .expect("Could not encode action");
 
 
     let action = Action {
@@ -61,7 +76,7 @@ fn main() {
         alternate_actions: Some(buf),
     };
 
-    let (mut msg,_) = rts.update(Some(&action));
+    let (mut msg, _) = rts.update(Some(&action));
     let msg = msg.packets.pop().unwrap();
     encode_and_send_proto(&mut conn, &msg);
     receive_and_decode_proto(&mut conn);
@@ -69,17 +84,23 @@ fn main() {
     loop {
         thread::sleep(sleep_time);
 
-        let (mut msg,vict) = rts.update(None);
+        let (mut msg, vict) = rts.update(None);
 
-        println!("{:?}", msg);
+        // println!("{:?}", msg);
 
         encode_and_send_proto(&mut conn, &msg.packets.pop().unwrap());
         receive_and_decode_proto(&mut conn);
 
         match vict {
-            VictoryState::Victory => { println!("Won with reward 100");  return; },
-            VictoryState::Defeat => { println!("Lost with reward -100");  return; },
-            VictoryState::Continue => {},
+            VictoryState::Victory => {
+                println!("Won with reward 100");
+                return;
+            }
+            VictoryState::Defeat => {
+                println!("Lost with reward -100");
+                return;
+            }
+            VictoryState::Continue => {}
         }
     }
 }
@@ -92,18 +113,19 @@ fn make_viz_init() -> ScaiiPacket {
             endpoint: Some(endpoint::Endpoint::Backend(protos::BackendEndpoint {})),
         },
         dest: protos::Endpoint {
-            endpoint: Some(endpoint::Endpoint::Module(
-                protos::ModuleEndpoint { name: "viz".to_string() },
-            )),
+            endpoint: Some(endpoint::Endpoint::Module(protos::ModuleEndpoint {
+                name: "viz".to_string(),
+            })),
         },
 
-        specific_msg: Some(scaii_packet::SpecificMsg::VizInit(protos::VizInit {})),
+        specific_msg: Some(scaii_packet::SpecificMsg::VizInit(protos::VizInit {
+            test_mode: Some(false),
+        })),
     }
 }
 
-fn server_startup(client: &mut Client<TcpStream>) {
-    let viz_init = make_viz_init();
-    encode_and_send_proto(client, &viz_init).expect("Could not send VizInit message");
+fn server_startup(client: &mut Client<TcpStream>, init: &ScaiiPacket) {
+    encode_and_send_proto(client, &init).expect("Could not send VizInit message");
 }
 
 fn connect() -> Client<TcpStream> {
@@ -111,7 +133,7 @@ fn connect() -> Client<TcpStream> {
     use std::time::Duration;
     use std::net::SocketAddr;
 
-    let addr = SocketAddr::new(From::from([127,0,0,1]), 6112);
+    let addr = SocketAddr::new(From::from([127, 0, 0, 1]), 6112);
     let mut server = Server::bind(addr).expect("Could not bind server to provided ip/port");
     // For some reason, we can't use expect here because apparently the result doesn't implement
     // the Debug trait?
@@ -144,14 +166,14 @@ fn encode_and_send_proto(
     use websocket::message;
 
     let mut buf: Vec<u8> = Vec::new();
-    packet.encode(&mut buf).expect(
-        "Could not encode SCAII packet (server error)",
-    );
+    packet
+        .encode(&mut buf)
+        .expect("Could not encode SCAII packet (server error)");
 
     client.send_message(&message::Message::binary(buf))?;
     Ok(())
 }
 
-fn receive_and_decode_proto(client: &mut Client<TcpStream>)  {
+fn receive_and_decode_proto(client: &mut Client<TcpStream>) {
     let msg = client.recv_message();
 }
