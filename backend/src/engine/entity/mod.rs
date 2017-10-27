@@ -13,6 +13,8 @@ const MAX_ID_GUESS: usize = 1_000_000;
 
 pub type EntityId = usize;
 
+pub type PlayerId = usize;
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Entity {
     id: EntityId,
@@ -94,11 +96,13 @@ impl IdManager {
         }
 
         match self.reclaimed.difference(&self.in_use).next() {
-            None => if self.panic_on_exceeds_max_id {
-                panic!("Exceeded maximum safe ID");
-            } else {
-                self.next_id_simple()
-            },
+            None => {
+                if self.panic_on_exceeds_max_id {
+                    panic!("Exceeded maximum safe ID");
+                } else {
+                    self.next_id_simple()
+                }
+            }
             Some(&id) => {
                 // Don't need to remove from reclaimed
                 // because the set difference takes care of duplicates

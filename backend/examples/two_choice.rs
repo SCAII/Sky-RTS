@@ -62,9 +62,9 @@ fn main() {
     };
 
     let mut buf: Vec<u8> = Vec::new();
-    rts_action
-        .encode(&mut buf)
-        .expect("Could not encode action");
+    rts_action.encode(&mut buf).expect(
+        "Could not encode action",
+    );
 
 
     let action = Action {
@@ -111,14 +111,14 @@ fn make_viz_init() -> ScaiiPacket {
             endpoint: Some(endpoint::Endpoint::Backend(protos::BackendEndpoint {})),
         },
         dest: protos::Endpoint {
-            endpoint: Some(endpoint::Endpoint::Module(protos::ModuleEndpoint {
-                name: "viz".to_string(),
-            })),
+            endpoint: Some(endpoint::Endpoint::Module(
+                protos::ModuleEndpoint { name: "viz".to_string() },
+            )),
         },
 
-        specific_msg: Some(scaii_packet::SpecificMsg::VizInit(protos::VizInit {
-            test_mode: Some(false),
-        })),
+        specific_msg: Some(scaii_packet::SpecificMsg::VizInit(
+            protos::VizInit { test_mode: Some(false) },
+        )),
     }
 }
 
@@ -164,9 +164,9 @@ fn encode_and_send_proto(
     use websocket::message;
 
     let mut buf: Vec<u8> = Vec::new();
-    packet
-        .encode(&mut buf)
-        .expect("Could not encode SCAII packet (server error)");
+    packet.encode(&mut buf).expect(
+        "Could not encode SCAII packet (server error)",
+    );
 
     client.send_message(&message::Message::binary(buf))?;
     Ok(())

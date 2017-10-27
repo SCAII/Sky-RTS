@@ -1,5 +1,5 @@
 use engine::entity::components::Pos;
-use engine::entity::EntityId;
+use engine::entity::{EntityId, PlayerId};
 use engine::system::System;
 use std::collections::BTreeMap;
 
@@ -12,7 +12,8 @@ pub enum VictoryState {
 }
 
 pub struct TriggerInput {
-    pub positions: BTreeMap<EntityId,Pos>,
+    pub positions: BTreeMap<EntityId, Pos>,
+    pub factions: BTreeMap<EntityId, PlayerId>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -20,7 +21,7 @@ pub struct Trigger {}
 
 impl Trigger {
     pub fn new() -> Self {
-        Trigger{}
+        Trigger {}
     }
 }
 
@@ -41,7 +42,7 @@ impl System for Trigger {
 
         if pos_eq(agent_pos, good_pos) {
             VictoryState::Victory
-        } else if dist(agent_pos,bad_pos) < 10.0 {
+        } else if dist(agent_pos, bad_pos) < 10.0 {
             VictoryState::Defeat
         } else {
             VictoryState::Continue
@@ -59,10 +60,10 @@ impl System for Trigger {
 
 #[inline]
 fn pos_eq(a: &Pos, b: &Pos) -> bool {
-    (a.x-b.x).abs() <= 1e-4 && (a.y-b.y).abs() <= 1e-4
+    (a.x - b.x).abs() <= 1e-4 && (a.y - b.y).abs() <= 1e-4
 }
 
 fn dist(a: &Pos, b: &Pos) -> f64 {
-    let tmp = (a.x - b.x) * (a.x - b.x) + (a.y-b.y) * (a.y-b.y);
+    let tmp = (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
     tmp.sqrt()
 }

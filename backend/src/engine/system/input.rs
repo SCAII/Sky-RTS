@@ -25,9 +25,7 @@ pub struct InputSystem {
 
 impl InputSystem {
     pub fn new() -> Self {
-        InputSystem {
-            style: ActionStyle::ActionList,
-        }
+        InputSystem { style: ActionStyle::ActionList }
     }
 }
 
@@ -87,14 +85,12 @@ impl System for InputSystem {
 
 fn action_to_unit_actions(action: Action) -> ActionList {
     use prost::Message;
-    let msg = action
-        .alternate_actions
-        .expect("Only action lists are supported right now");
+    let msg = action.alternate_actions.expect(
+        "Only action lists are supported right now",
+    );
 
     if msg.len() == 0 {
-        return ActionList {
-            actions: Vec::new(),
-        };
+        return ActionList { actions: Vec::new() };
     }
 
 

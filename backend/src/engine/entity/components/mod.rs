@@ -30,9 +30,7 @@ impl Default for Renderable {
     fn default() -> Self {
         Renderable {
             pos: Pos::default(),
-            shape: Shape::Triangle {
-                base_len: Default::default(),
-            },
+            shape: Shape::Triangle { base_len: Default::default() },
             color: Color::default(),
         }
     }

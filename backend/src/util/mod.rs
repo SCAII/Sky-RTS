@@ -1,4 +1,4 @@
-const SEED_SIZE: usize = 20;
+const SEED_SIZE: usize = 256;
 
 use rand::{Rng, SeedableRng, StdRng};
 use rand;
@@ -26,5 +26,9 @@ pub fn diverge_std_rng_fast(rng: &mut StdRng) {
 }
 
 fn fallback_seed() -> [usize; SEED_SIZE] {
-    rand::thread_rng().gen()
+    let mut buf = [0; SEED_SIZE];
+    for i in 0..SEED_SIZE {
+        buf[i] = rand::thread_rng().gen();
+    }
+    buf
 }

@@ -15,9 +15,7 @@ pub struct Render {
 
 impl Render {
     pub fn new() -> Self {
-        Render {
-            draw_components: BTreeMap::new(),
-        }
+        Render { draw_components: BTreeMap::new() }
     }
 }
 

@@ -3,12 +3,14 @@ pub mod graphics;
 pub mod system;
 
 use scaii_defs::protos::{Action, MultiMessage};
+use rand::StdRng;
+use std::collections::BTreeMap;
 
 use self::system::{InputSystem, Movement, Render};
 use self::system::trigger::{Trigger, TriggerInput, VictoryState};
 use self::system::movement::MoveResult;
 use self::system::init::GameInit;
-use self::entity::IdManager;
+use self::entity::{EntityId, IdManager, PlayerId};
 
 const SECONDS_PER_FRAME: f64 = 1.0 / 60.0;
 
@@ -18,7 +20,10 @@ pub struct Rts {
     pub movement_system: Movement,
     input_system: InputSystem,
     trigger_system: Trigger,
+    factions: BTreeMap<EntityId, PlayerId>,
     init: GameInit,
+
+    rng: StdRng,
 
     /* The result fields are just caches to avoid memory allocation
     so we don't need to serialize them */
@@ -30,12 +35,16 @@ pub struct Rts {
 
 impl Rts {
     pub fn new() -> Self {
+        use util;
         Rts {
             render_system: Render::new(),
             movement_system: Movement::new(),
             input_system: InputSystem::new(),
             trigger_system: Trigger::new(),
             init: GameInit::Towers,
+            factions: BTreeMap::new(),
+
+            rng: util::no_fail_std_rng(),
 
             move_result: None,
 
@@ -50,8 +59,12 @@ impl Rts {
         use scaii_defs::protos;
         use scaii_defs::protos::{BackendEndpoint, ModuleEndpoint};
 
-        let (viz_init, viz) = self.init
-            .init(&mut self.render_system, &mut self.movement_system);
+        let (viz_init, viz) = self.init.init(
+            &mut self.render_system,
+            &mut self.movement_system,
+            &mut self.factions,
+            &mut self.rng,
+        );
 
         let init_packet = ScaiiPacket {
             specific_msg: Some(SpecificMsg::VizInit(viz_init)),
@@ -116,6 +129,7 @@ impl Rts {
 
         let trigger = TriggerInput {
             positions: self.movement_system.component_map().clone(),
+            factions: self.factions.clone(),
         };
 
         let vic_state = self.trigger_system
