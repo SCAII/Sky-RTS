@@ -143,11 +143,22 @@ impl Rts {
         use scaii_defs::protos::{BackendEndpoint, Endpoint, ModuleEndpoint, ScaiiPacket, Viz};
         use scaii_defs::protos::scaii_packet::SpecificMsg;
         use self::system::input::RtsCommand;
+        use self::system::input::ActionInput;
 
-        let mut actions = match msg {
+        let actions = match msg {
             Some(action) => vec![action.clone()],
             None => vec![],
         };
+
+        let mut actions: Vec<_> = actions
+            .into_iter()
+            .map(|a| {
+                ActionInput {
+                    action: a,
+                    positions: self.movement_system.move_components.clone(),
+                }
+            })
+            .collect();
 
         let input_result = self.input_system
             .update(&mut actions, SECONDS_PER_FRAME, None);
