@@ -5,6 +5,7 @@ pub mod system;
 use scaii_defs::protos::{Action, MultiMessage};
 use rand::StdRng;
 use std::collections::BTreeMap;
+use scaii_defs::protos::ScaiiPacket;
 
 use self::system::{InputSystem, Movement, Render};
 use self::system::trigger::{Trigger, TriggerInput, VictoryState};
@@ -52,6 +53,50 @@ impl Rts {
         }
     }
 
+    fn build_state(&self, vic: VictoryState) -> ScaiiPacket {
+        use ndarray::Array3;
+        use scaii_defs::protos::scaii_packet::SpecificMsg;
+        use scaii_defs::protos::endpoint::Endpoint;
+        use scaii_defs::protos;
+        use scaii_defs::protos::{AgentEndpoint, BackendEndpoint, State};
+        use std::collections::HashMap;
+
+        let mut tile_map = Array3::zeros((2000 / 20, 2000 / 20, 3));
+
+        for id in self.movement_system.move_components.keys() {
+            let pos = self.movement_system.move_components.get(id).unwrap();
+            tile_map[((pos.x / 20.0) as usize, (pos.y / 20.0) as usize, *id)] = 1.0;
+        }
+
+        let flat_map = tile_map.into_raw_vec();
+
+        let (reward, id) = vic.typed_reward();
+        let mut reward_map = HashMap::with_capacity(1);
+        reward_map.insert(format!("{}", id), reward);
+
+        let terminal = match vic {
+            VictoryState::Victory(..) | VictoryState::Defeat(..) => true,
+            _ => false,
+        };
+
+        ScaiiPacket {
+            src: protos::Endpoint {
+                endpoint: Some(Endpoint::Backend(BackendEndpoint {})),
+            },
+            dest: protos::Endpoint {
+                endpoint: Some(Endpoint::Agent(AgentEndpoint {})),
+            },
+            specific_msg: Some(SpecificMsg::State(State {
+                features: flat_map,
+                feature_array_dims: vec![2000 / 20, 2000 / 20, 3],
+                reward: Some(reward),
+                expanded_state: None,
+                typed_reward: reward_map,
+                terminal: terminal,
+            })),
+        }
+    }
+
     pub fn restart(&mut self) -> MultiMessage {
         use scaii_defs::protos::scaii_packet::SpecificMsg;
         use scaii_defs::protos::ScaiiPacket;
@@ -84,12 +129,14 @@ impl Rts {
             dest: init_packet.dest.clone(),
         };
 
+        let state_packet = self.build_state(VictoryState::Continue(0.0, 0));
+
         MultiMessage {
-            packets: vec![init_packet, viz_packet],
+            packets: vec![init_packet, viz_packet, state_packet],
         }
     }
 
-    pub fn update(&mut self, msg: Option<&Action>) -> (MultiMessage, VictoryState) {
+    pub fn update(&mut self, msg: Option<&Action>) -> MultiMessage {
         use self::system::System;
         use std::mem;
         use scaii_defs::protos;
@@ -135,24 +182,25 @@ impl Rts {
         let vic_state = self.trigger_system
             .update(&mut vec![trigger], SECONDS_PER_FRAME, None);
 
-        (
-            MultiMessage {
-                packets: vec![
-                    // Stuff sent to visualization target
-                    ScaiiPacket {
-                        src: Endpoint {
-                            endpoint: Some(protos::endpoint::Endpoint::Backend(BackendEndpoint {})),
-                        },
-                        dest: Endpoint {
-                            endpoint: Some(protos::endpoint::Endpoint::Module(ModuleEndpoint {
-                                name: "viz".to_string(),
-                            })),
-                        },
-                        specific_msg: Some(SpecificMsg::Viz(packet)),
+        let state_packet = self.build_state(vic_state);
+
+
+        MultiMessage {
+            packets: vec![
+                // Stuff sent to visualization target
+                ScaiiPacket {
+                    src: Endpoint {
+                        endpoint: Some(protos::endpoint::Endpoint::Backend(BackendEndpoint {})),
                     },
-                ],
-            },
-            vic_state,
-        )
+                    dest: Endpoint {
+                        endpoint: Some(protos::endpoint::Endpoint::Module(ModuleEndpoint {
+                            name: "viz".to_string(),
+                        })),
+                    },
+                    specific_msg: Some(SpecificMsg::Viz(packet)),
+                },
+                state_packet,
+            ],
+        }
     }
 }

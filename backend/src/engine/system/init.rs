@@ -103,14 +103,11 @@ fn towers<R: Rng>(
     let tower_width = 15.0;
     let tower_height = 15.0;
 
-            let mut x_pos = rng.gen_range(0.0, 1000.0); 
-        let mut y_pos = rng.gen_range(0.0, 1000.0);
-
     for i in 1..rng.gen_range(8, 12) {
         let good: bool = rng.gen();
         faction.insert(i, if good { 1 } else { 2 });
-        x_pos = rng.gen_range(0.0, 1000.0); 
-        y_pos = rng.gen_range(0.0, 1000.0);
+        let mut x_pos = rng.gen_range(0.0, 1000.0);
+        let mut y_pos = rng.gen_range(0.0, 1000.0);
 
         while ((entity_x - x_pos).powf(2.0) + (entity_y - y_pos).powf(2.0)).sqrt() < 100.0 {
             x_pos = rng.gen_range(0.0, 1000.0);
@@ -123,63 +120,59 @@ fn towers<R: Rng>(
                 x: x_pos,
                 y: y_pos,
                 heading: 0.0,
-            }
+            },
         );
 
         render_sys.add_component(
-        i,
-        Renderable {
-            pos: Pos {
-                x: x_pos,
-                y: y_pos,
-                heading: 0.0,
+            i,
+            Renderable {
+                pos: Pos {
+                    x: x_pos,
+                    y: y_pos,
+                    heading: 0.0,
+                },
+                color: Color {
+                    r: if good { 0 } else { 255 },
+                    g: if good { 255 } else { 0 },
+                    b: 0,
+                    a: 255,
+                },
+                shape: Shape::Rect {
+                    width: tower_width,
+                    height: tower_height,
+                },
             },
-            color: Color {
-                r: if good { 0 } else { 255 },
-                g: if good { 255 } else { 0 },
-                b: 0,
-                a: 255,
-            },
-            shape: Shape::Rect {
-                width: tower_width,
-                height: tower_height,
-            },
-        },
         );
 
-        viz.entities.push(
-            Entity {
-                id: i as u64,
-                pos: Some(protos::Pos {
-                    x: Some(x_pos),
-                    y: Some(y_pos)
-                }),
-                shapes: vec![
-                    protos::Shape {
-                        id: 0,
-                        relative_pos: Some(protos::Pos {
-                            x: Some(0.0),
-                            y: Some(0.0),
-                        }),
-                        color: Some(protos::Color {
-                            r: if good { 0 } else  { 255 },
-                            g: if good { 255 } else { 0 },
-                            b: 0,
-                            a: 255
-                        }),
-                        rect: Some(protos::Rect {
-                            width: Some(tower_width),
-                            height: Some(tower_height)
-                        }),
-                        triangle: None,
-                        delete: false,
-                    }
-                ],
-                delete: false,
-            }
-        )
-
-
+        viz.entities.push(Entity {
+            id: i as u64,
+            pos: Some(protos::Pos {
+                x: Some(x_pos),
+                y: Some(y_pos),
+            }),
+            shapes: vec![
+                protos::Shape {
+                    id: 0,
+                    relative_pos: Some(protos::Pos {
+                        x: Some(0.0),
+                        y: Some(0.0),
+                    }),
+                    color: Some(protos::Color {
+                        r: if good { 0 } else { 255 },
+                        g: if good { 255 } else { 0 },
+                        b: 0,
+                        a: 255,
+                    }),
+                    rect: Some(protos::Rect {
+                        width: Some(tower_width),
+                        height: Some(tower_height),
+                    }),
+                    triangle: None,
+                    delete: false,
+                },
+            ],
+            delete: false,
+        })
     }
 
 

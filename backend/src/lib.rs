@@ -26,8 +26,9 @@ use scaii_defs::protos::{MultiMessage, ScaiiPacket};
 
 use std::error::Error;
 
-const SUPPORTED: BackendSupported =
-    BackendSupported { serialization: SerializationStyle::NondivergingOnly };
+const SUPPORTED: BackendSupported = BackendSupported {
+    serialization: SerializationStyle::NondivergingOnly,
+};
 
 pub struct Context {
     rts: Rts,
@@ -45,10 +46,10 @@ impl Module for Context {
         use scaii_defs::protos::scaii_packet::SpecificMsg;
         match packet.specific_msg {
             Some(SpecificMsg::Action(ref action)) => {
-                self.awaiting_msgs.push(self.rts.update(Some(action)).0)
+                self.awaiting_msgs.push(self.rts.update(Some(action)))
             }
             _ => {
-                self.awaiting_msgs.push(self.rts.update(None).0);
+                self.awaiting_msgs.push(self.rts.update(None));
             }
         }
 
@@ -59,7 +60,11 @@ impl Module for Context {
         use scaii_defs;
 
         scaii_defs::protos::merge_multi_messages(self.awaiting_msgs.drain(..).collect())
-            .unwrap_or_else(|| MultiMessage { packets: Vec::new() })
+            .unwrap_or_else(|| {
+                MultiMessage {
+                    packets: Vec::new(),
+                }
+            })
     }
 }
 

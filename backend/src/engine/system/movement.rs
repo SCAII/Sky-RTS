@@ -21,7 +21,7 @@ pub struct MoveResult {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Movement {
-    move_components: BTreeMap<EntityId, components::Movement>,
+    pub move_components: BTreeMap<EntityId, components::Movement>,
     partial_updates: BTreeMap<EntityId, MoveUpdate>,
 }
 

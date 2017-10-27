@@ -6,9 +6,18 @@ use std::collections::BTreeMap;
 lazy_static!{ static ref EMPTY_MAP: BTreeMap<EntityId, ()> = { BTreeMap::new() };}
 
 pub enum VictoryState {
-    Victory,
-    Defeat,
-    Continue,
+    Victory(f64, EntityId),
+    Defeat(f64, EntityId),
+    Continue(f64, EntityId),
+}
+
+impl VictoryState {
+    pub fn typed_reward(&self) -> (f64, EntityId) {
+        use self::VictoryState::{Continue, Defeat, Victory};
+        match *self {
+            Victory(r, id) | Defeat(r, id) | Continue(r, id) => (r, id),
+        }
+    }
 }
 
 pub struct TriggerInput {
@@ -37,16 +46,18 @@ impl System for Trigger {
         _: Option<Self::Result>,
     ) -> Self::Result {
         let agent_pos = updates[0].positions.get(&0).unwrap();
-        let good_pos = updates[0].positions.get(&1).unwrap();
-        let bad_pos = updates[0].positions.get(&2).unwrap();
 
-        if pos_eq(agent_pos, good_pos) {
-            VictoryState::Victory
-        } else if dist(agent_pos, bad_pos) < 10.0 {
-            VictoryState::Defeat
-        } else {
-            VictoryState::Continue
+        for tower_id in updates[0].positions.keys().filter(|k| **k != 1) {
+            let pos = updates[0].positions.get(tower_id).unwrap();
+            let faction = updates[0].factions.get(tower_id).unwrap();
+            if pos_eq(agent_pos, pos) && faction == &1 {
+                return VictoryState::Victory(100.0, *tower_id);
+            } else if dist(agent_pos, pos) < 50.0 && faction == &2 {
+                return VictoryState::Defeat(-100.0, *tower_id);
+            }
         }
+
+        VictoryState::Continue(0.0, 0)
     }
 
     fn add_component(&mut self, _: EntityId, _: Self::Component) {}
