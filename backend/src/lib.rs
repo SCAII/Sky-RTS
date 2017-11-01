@@ -1,10 +1,5 @@
-#![allow(dead_code)]
-
 extern crate bincode;
 extern crate bytes;
-#[macro_use]
-extern crate lazy_static;
-extern crate ndarray;
 extern crate prost;
 #[macro_use]
 extern crate prost_derive;
@@ -14,6 +9,7 @@ extern crate scaii_defs;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+extern crate specs;
 
 pub mod engine;
 pub(crate) mod util;
@@ -31,8 +27,8 @@ const SUPPORTED: BackendSupported = BackendSupported {
 };
 
 pub struct Context {
-    rts: Rts,
-    awaiting_msgs: Vec<MultiMessage>,
+    _rts: Rts,
+    _awaiting_msgs: Vec<MultiMessage>,
 }
 
 impl Context {
@@ -42,29 +38,12 @@ impl Context {
 }
 
 impl Module for Context {
-    fn process_msg(&mut self, packet: &ScaiiPacket) -> Result<(), Box<Error>> {
-        use scaii_defs::protos::scaii_packet::SpecificMsg;
-        match packet.specific_msg {
-            Some(SpecificMsg::Action(ref action)) => {
-                self.awaiting_msgs.push(self.rts.update(Some(action)))
-            }
-            _ => {
-                self.awaiting_msgs.push(self.rts.update(None));
-            }
-        }
-
-        Ok(())
+    fn process_msg(&mut self, _packet: &ScaiiPacket) -> Result<(), Box<Error>> {
+        unimplemented!()
     }
 
     fn get_messages(&mut self) -> MultiMessage {
-        use scaii_defs;
-
-        scaii_defs::protos::merge_multi_messages(self.awaiting_msgs.drain(..).collect())
-            .unwrap_or_else(|| {
-                MultiMessage {
-                    packets: Vec::new(),
-                }
-            })
+        unimplemented!()
     }
 }
 
@@ -73,46 +52,29 @@ impl Backend for Context {
         SUPPORTED
     }
 
-    fn serialize(&mut self, into: Option<Vec<u8>>) -> Result<Vec<u8>, Box<Error>> {
-        use std::io::BufWriter;
-        use bincode;
-
-        let buf = into.unwrap_or_else(Vec::new);
-        let mut buf = BufWriter::new(buf);
-
-        bincode::serialize_into(&mut buf, &self.rts, bincode::Infinite)?;
-        Ok(buf.into_inner()?)
+    fn serialize(&mut self, _into: Option<Vec<u8>>) -> Result<Vec<u8>, Box<Error>> {
+        unimplemented!()
     }
 
-    fn deserialize(&mut self, buf: &[u8]) -> Result<(), Box<Error>> {
-        use std::io::BufReader;
-        use bincode;
-
-        let mut buf = BufReader::new(buf);
-
-        self.rts = bincode::deserialize_from(&mut buf, bincode::Infinite)?;
-
-        Ok(())
+    fn deserialize(&mut self, _buf: &[u8]) -> Result<(), Box<Error>> {
+        unimplemented!()
     }
 
-    fn serialize_diverging(&mut self, into: Option<Vec<u8>>) -> Result<Vec<u8>, Box<Error>> {
-        let out = self.serialize(into);
+    fn serialize_diverging(&mut self, _into: Option<Vec<u8>>) -> Result<Vec<u8>, Box<Error>> {
+        unimplemented!()
+    }
+
+    fn deserialize_diverging(&mut self, _buf: &[u8]) -> Result<(), Box<Error>> {
         self.diverge();
-        out
-    }
-
-    fn deserialize_diverging(&mut self, buf: &[u8]) -> Result<(), Box<Error>> {
-        let out = self.deserialize(buf);
-        self.diverge();
-        out
+        unimplemented!()
     }
 }
 
 #[no_mangle]
 pub fn new() -> Box<Module> {
     Box::new(Context {
-        rts: Rts::new(),
-        awaiting_msgs: vec![],
+        _rts: Rts::new(),
+        _awaiting_msgs: vec![],
     })
 }
 
@@ -124,7 +86,7 @@ pub fn supported_behavior() -> BackendSupported {
 #[no_mangle]
 pub fn new_backend() -> Box<Backend> {
     Box::new(Context {
-        rts: Rts::new(),
-        awaiting_msgs: vec![],
+        _rts: Rts::new(),
+        _awaiting_msgs: vec![],
     })
 }

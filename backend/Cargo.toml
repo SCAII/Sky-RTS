@@ -11,11 +11,9 @@ scaii_defs = {git = "https://github.com/SCAII/SCAII", branch="glue"}
 rlua  = "0.9"
 serde = "1"
 serde_derive = "1"
-ndarray = {version="0.10", features=["serde-1"]}
 rand = { git = 'https://github.com/LinearZoetrope/rand', branch="serde", features=["serde-1"] }
-lifeguard = "0.5"
-lazy_static = "0.2"
 bincode = "0.9"
+specs = "0.10"
 
 prost = "0.2"
 prost-derive = "0.2"
@@ -24,6 +22,3 @@ bytes = "0.4.5"
 [build-dependencies]
 prost-build = "0.2"
 glob = "0.2.11"
-
-[dev-dependencies]
-websocket = "0.20"
