@@ -13,7 +13,7 @@ serde = "1"
 serde_derive = "1"
 rand = { git = 'https://github.com/LinearZoetrope/rand', branch="serde", features=["serde-1"] }
 bincode = "0.9"
-specs = "0.10"
+specs = { version="0.10", features=["serde"] }
 specs-derive = "0.1"
 
 prost = "0.2"

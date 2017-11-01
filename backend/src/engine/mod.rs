@@ -22,6 +22,7 @@ impl Rts {
         let mut world = World::new();
         world.register::<self::components::Pos>();
         world.register::<self::components::Heading>();
+        world.register::<self::components::Move>();
 
         let rng = util::no_fail_std_rng();
         world.add_resource(rng);
