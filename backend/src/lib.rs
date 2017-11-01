@@ -23,7 +23,7 @@ use scaii_defs::protos::{MultiMessage, ScaiiPacket};
 use std::error::Error;
 
 const SUPPORTED: BackendSupported = BackendSupported {
-    serialization: SerializationStyle::NondivergingOnly,
+    serialization: SerializationStyle::None,
 };
 
 pub struct Context {
