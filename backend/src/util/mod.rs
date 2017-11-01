@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 const SEED_SIZE: usize = 256;
 
 use rand::{Rng, SeedableRng, StdRng};
