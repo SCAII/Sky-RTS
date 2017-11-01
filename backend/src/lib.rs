@@ -10,6 +10,8 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate specs;
+#[macro_use]
+extern crate specs_derive;
 
 pub mod engine;
 pub(crate) mod util;

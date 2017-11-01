@@ -14,6 +14,7 @@ serde_derive = "1"
 rand = { git = 'https://github.com/LinearZoetrope/rand', branch="serde", features=["serde-1"] }
 bincode = "0.9"
 specs = "0.10"
+specs-derive = "0.1"
 
 prost = "0.2"
 prost-derive = "0.2"
