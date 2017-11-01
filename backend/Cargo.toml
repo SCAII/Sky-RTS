@@ -13,7 +13,8 @@ serde = "1"
 serde_derive = "1"
 rand = { git = 'https://github.com/LinearZoetrope/rand', branch="serde", features=["serde-1"] }
 bincode = "0.9"
-specs = { version="0.10", features=["serde"] }
+# we need saveload. Fix this when specs hits 0.11
+specs = { version="0.10", features=["serde"], git="https://github.com/slide-rs/specs"}
 specs-derive = "0.1"
 
 prost = "0.2"

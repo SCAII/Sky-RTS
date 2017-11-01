@@ -18,6 +18,7 @@ pub struct Rts {
 impl Rts {
     pub fn new() -> Self {
         use util;
+        use rlua::Lua;
 
         let mut world = World::new();
         world.register::<self::components::Pos>();
