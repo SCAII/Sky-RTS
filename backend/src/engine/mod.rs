@@ -3,7 +3,12 @@ pub mod components;
 pub mod systems;
 
 use scaii_defs::protos::MultiMessage;
+
 use specs::World;
+
+// 60FPS emulation since we're not
+// actually measuring time elapsed
+const SIXTY_FPS: f64 = 1.0 / 60.0;
 
 #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub struct Episode(usize);
@@ -32,7 +37,7 @@ impl Rts {
         world.add_resource(rng);
         world.add_resource(Episode(0));
         world.add_resource(Terminal(false));
-        world.add_resource(DeltaT(0.0));
+        world.add_resource(DeltaT(SIXTY_FPS));
 
         Rts { world }
     }
