@@ -1,11 +1,11 @@
-use specs::{Entities, Entity, Fetch, System, WriteStorage};
+use specs::{Entities, Entity, Fetch, ReadStorage, System, WriteStorage};
 use engine::components::{Move, MoveBehavior, MoveTarget, MovedFlag, Pos};
 use engine::DeltaT;
 
 #[derive(SystemData)]
 pub struct MoveSystemData<'a> {
     positions: WriteStorage<'a, Pos>,
-    moves: WriteStorage<'a, Move>,
+    moves: ReadStorage<'a, Move>,
     moved: WriteStorage<'a, MovedFlag>,
     delta_t: Fetch<'a, DeltaT>,
     ids: Entities<'a>,
@@ -35,9 +35,7 @@ impl<'a> System<'a> for MoveSystem {
 
         let targets = &mut self.target_cache;
 
-        for (pos, moves, id) in
-            (&mut sys_data.positions, &mut sys_data.moves, &*sys_data.ids).join()
-        {
+        for (pos, moves, id) in (&mut sys_data.positions, &sys_data.moves, &*sys_data.ids).join() {
             sys_data.moved.insert(id, MovedFlag);
 
             match *moves {
