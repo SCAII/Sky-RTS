@@ -55,7 +55,7 @@ impl<'a> System<'a> for MoveSystem {
             }
         }
 
-        targets.clear();
+        for (_id, _target) in targets.drain(..) {}
     }
 }
 

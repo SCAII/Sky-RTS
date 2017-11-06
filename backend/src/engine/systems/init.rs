@@ -1,12 +1,15 @@
-use rlua::Lua;
-use specs::System;
+use specs::{Fetch, System};
 
-pub struct Init {
-    _lua: Lua,
-}
+use engine::LuaSrc;
+
+#[derive(Default)]
+pub struct Init;
+
 
 impl<'a> System<'a> for Init {
-    type SystemData = ();
+    // We use FetchMut despite the interior mutability to ensure
+    // only one system is scheduled to use the Lua at once for safety
+    type SystemData = Fetch<'a, LuaSrc>;
 
     fn run(&mut self, _: Self::SystemData) {}
 }

@@ -2,6 +2,8 @@ pub mod graphics;
 pub mod components;
 pub mod systems;
 
+use rlua::Lua;
+
 use scaii_defs::protos::MultiMessage;
 
 use specs::World;
@@ -17,6 +19,9 @@ pub struct Terminal(bool);
 
 #[derive(Copy, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct DeltaT(f64);
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct LuaSrc(String);
 
 pub struct Rts {
     world: World,
@@ -40,6 +45,10 @@ impl Rts {
         world.add_resource(DeltaT(SIXTY_FPS));
 
         Rts { world }
+    }
+
+    pub fn add_lua(&mut self, src: String) {
+        self.world.add_resource(LuaSrc(src));
     }
 
     /// Causes the random number state to diverge

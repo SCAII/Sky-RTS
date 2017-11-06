@@ -3,6 +3,9 @@ const SEED_SIZE: usize = 256;
 use rand::{Rng, SeedableRng, StdRng};
 use rand;
 
+pub mod lua;
+pub use self::lua::*;
+
 /// Allows us to create a new StdRng, but
 /// uses a fallback pseudorandom `thread_rng`
 /// array of values as the seed

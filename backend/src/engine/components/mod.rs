@@ -15,6 +15,12 @@ pub use self::move_component::*;
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Pos(Vector2<f64>);
 
+impl Pos {
+    pub fn new(x: f64, y: f64) -> Self {
+        Pos(Vector2::new(x, y))
+    }
+}
+
 impl Component for Pos {
     type Storage = FlaggedStorage<Self, VecStorage<Self>>;
 }
