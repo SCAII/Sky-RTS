@@ -17,7 +17,7 @@ pub enum MoveBehavior {
 #[derive(Copy, Clone, PartialEq)]
 pub enum MoveTarget {
     Ground(Pos),
-    Unit(Entity), // need serialization workaround
+    Unit(Entity),
 }
 
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize)]
