@@ -75,7 +75,7 @@ fn move_ground(pos: &mut Pos, tar_pos: &Pos, behavior: &MoveBehavior, delta_t: f
                 new_pos[0] = tar_pos[0];
             }
 
-            if dir[1].signum() != new_dir[0].signum() {
+            if dir[1].signum() != new_dir[1].signum() {
                 new_pos[1] = tar_pos[1];
             }
 
