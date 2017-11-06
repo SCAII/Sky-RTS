@@ -37,9 +37,6 @@ impl DerefMut for Pos {
 #[component(VecStorage)]
 pub struct Heading(f64);
 
-#[derive(Default)]
+#[derive(Default, Component, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[component(NullStorage)]
 pub struct MovedFlag;
-
-impl Component for MovedFlag {
-    type Storage = NullStorage<Self>;
-}
