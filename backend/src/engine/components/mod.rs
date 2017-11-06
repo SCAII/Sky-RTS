@@ -46,3 +46,33 @@ pub struct Heading(f64);
 #[derive(Default, Component, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[component(NullStorage)]
 pub struct MovedFlag;
+
+#[derive(Default, Copy, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Hp {
+    pub max_hp: f64,
+    pub curr_hp: f64,
+}
+
+impl Component for Hp {
+    type Storage = FlaggedStorage<Self, VecStorage<Self>>;
+}
+
+#[derive(Default, Component, Copy, Clone, PartialEq, Serialize, Deserialize)]
+#[component(VecStorage)]
+pub struct Damage {
+    pub damage: f64,
+}
+
+#[derive(Default, Component, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[component(VecStorage)]
+pub struct Color {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+}
+
+#[derive(Component, Copy, Clone, PartialEq, Serialize, Deserialize)]
+#[component(VecStorage)]
+pub enum Shape {
+    Triangle { base_len: f64 },
+}

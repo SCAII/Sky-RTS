@@ -1,34 +1,32 @@
-use rlua::{Error, Lua, UserData, UserDataMethods};
+use rlua::{Error, Lua, Table, UserData, UserDataMethods};
 
-use engine::components::Pos;
+use engine::components::{Color, Damage, Hp, Pos, Shape};
 
-use specs::{Entity, EntityBuilder};
+use specs::{World};
 
 #[derive(Default)]
-pub struct LuaEntityBuilder {
-    pos: Option<Pos>,
+pub struct GameBuilder {
+    pub players: Table,
+    pub units: Table,
 }
 
-impl LuaEntityBuilder {
-    pub fn into_entity<'a>(self, mut entity: EntityBuilder<'a>) -> Entity {
-        if let Some(pos) = self.pos {
-            entity = entity.with(pos);
-        }
-
-        entity.build()
-    }
+impl GameBuilder {
+    pub fn into_entities<'a>(self, world: &mut World) {}
 }
 
-impl UserData for LuaEntityBuilder {
+impl UserData for GameBuilder {
     fn add_methods(methods: &mut UserDataMethods<Self>) {
         methods.add_method_mut(
-            "set_pos",
-            |_, this, (x, y): (f64, f64)| -> Result<(), Error> {
-                this.pos = Some(Pos::new(x, y));
-
-                Ok(())
+            "create_unit",
+            |_, this, table: Table| -> Result<(), Error> {
+                this.units.push(table);
             },
         );
+
+        methods.add_method_mut("set_players"
+        |_, this, table: Table| {
+            this.players.push(table)
+        })
     }
 }
 

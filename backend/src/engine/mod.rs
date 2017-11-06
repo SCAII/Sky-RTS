@@ -23,8 +23,15 @@ pub struct DeltaT(f64);
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct LuaSrc(String);
 
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Player {
+    pub color: self::components::Color,
+}
+
 pub struct Rts {
     world: World,
+    lua: Lua,
+    lua_src: String,
 }
 
 
@@ -37,6 +44,8 @@ impl Rts {
         world.register::<self::components::Heading>();
         world.register::<self::components::Move>();
         world.register::<self::components::MovedFlag>();
+        world.register::<self::components::Hp>();
+        world.register::<self::components::Damage>();
 
         let rng = util::no_fail_std_rng();
         world.add_resource(rng);
@@ -44,11 +53,17 @@ impl Rts {
         world.add_resource(Terminal(false));
         world.add_resource(DeltaT(SIXTY_FPS));
 
-        Rts { world }
+        let lua = Lua::new();
+
+        Rts { world, lua }
     }
 
     pub fn add_lua(&mut self, src: String) {
-        self.world.add_resource(LuaSrc(src));
+        self.lua
+            .exec::<()>(&src, Some("Initializing RTS lua"))
+            .expect("Could not run user Lua");
+
+        self.lua_src = src;
     }
 
     /// Causes the random number state to diverge
@@ -66,6 +81,7 @@ impl Rts {
     pub fn restart(&mut self) -> MultiMessage {
         use rand::StdRng;
         use util;
+        use util::lua::GameBuilder;
 
         self.world.delete_all();
         // Do a fast reseed so it doesn't start looping the RNG state
@@ -76,6 +92,8 @@ impl Rts {
 
             self.world.write_resource::<Episode>().0 += 1;
             self.world.write_resource::<Terminal>().0 = false;
+
+            self.lua.exec::<()>(r#"""#, Some(""));
         }
 
         self.world.maintain();
