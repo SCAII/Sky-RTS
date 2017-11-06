@@ -20,18 +20,11 @@ pub enum MoveTarget {
     Unit(Entity),
 }
 
-#[derive(Copy, Clone, PartialEq, Serialize, Deserialize)]
-pub enum MoveAttack {
-    Attack,
-    Friendly,
-}
-
 #[derive(Component, Copy, Clone, PartialEq)]
 #[component(HashMapStorage)]
 pub struct Move {
     pub behavior: MoveBehavior,
     pub target: MoveTarget,
-    pub attacking: MoveAttack,
 }
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -43,7 +36,6 @@ pub enum MarkedMoveTarget<M: Marker> {
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct MoveData<M: Marker> {
     pub behavior: MoveBehavior,
-    pub attacking: MoveAttack,
     #[serde(bound = "M: Marker")] pub target: MarkedMoveTarget<M>,
 }
 
@@ -75,7 +67,6 @@ impl<M: Marker + Debug> SaveLoadComponent<M> for Move {
     {
         Ok(MoveData {
             behavior: self.behavior,
-            attacking: self.attacking,
             target: match self.target {
                 MoveTarget::Ground(pos) => MarkedMoveTarget::Ground(pos),
                 MoveTarget::Unit(entity) => MarkedMoveTarget::Unit(
@@ -91,7 +82,6 @@ impl<M: Marker + Debug> SaveLoadComponent<M> for Move {
     {
         Ok(Move {
             behavior: data.behavior,
-            attacking: data.attacking,
             target: match data.target {
                 MarkedMoveTarget::Ground(pos) => MoveTarget::Ground(pos),
                 MarkedMoveTarget::Unit(mark) => {

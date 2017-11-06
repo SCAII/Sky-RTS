@@ -16,10 +16,14 @@ bincode = "0.9"
 # we need saveload. Fix this when specs hits 0.11
 specs = { version="0.10", features=["serde"], git="https://github.com/slide-rs/specs"}
 specs-derive = "0.1"
+shred = "0.5"
+shred-derive = "0.3"
 
 prost = "0.2"
 prost-derive = "0.2"
 bytes = "0.4.5"
+
+nalgebra = {version="0.13", features=["serde-serialize"]}
 
 [build-dependencies]
 prost-build = "0.2"

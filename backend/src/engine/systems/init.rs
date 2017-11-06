@@ -2,7 +2,7 @@ use rlua::Lua;
 use specs::System;
 
 pub struct Init {
-    lua: Lua,
+    _lua: Lua,
 }
 
 impl<'a> System<'a> for Init {

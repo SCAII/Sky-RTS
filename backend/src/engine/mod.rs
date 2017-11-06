@@ -10,6 +10,9 @@ pub struct Episode(usize);
 #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub struct Terminal(bool);
 
+#[derive(Copy, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct DeltaT(f64);
+
 pub struct Rts {
     world: World,
 }
@@ -18,17 +21,18 @@ pub struct Rts {
 impl Rts {
     pub fn new() -> Self {
         use util;
-        use rlua::Lua;
 
         let mut world = World::new();
         world.register::<self::components::Pos>();
         world.register::<self::components::Heading>();
         world.register::<self::components::Move>();
+        world.register::<self::components::MovedFlag>();
 
         let rng = util::no_fail_std_rng();
         world.add_resource(rng);
         world.add_resource(Episode(0));
         world.add_resource(Terminal(false));
+        world.add_resource(DeltaT(0.0));
 
         Rts { world }
     }

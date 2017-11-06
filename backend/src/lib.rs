@@ -1,5 +1,6 @@
 extern crate bincode;
 extern crate bytes;
+extern crate nalgebra;
 extern crate prost;
 #[macro_use]
 extern crate prost_derive;
@@ -9,6 +10,9 @@ extern crate scaii_defs;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 extern crate specs;
 #[macro_use]
 extern crate specs_derive;
