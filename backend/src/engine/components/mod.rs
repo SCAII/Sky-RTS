@@ -1,10 +1,10 @@
 use specs::{HashMapStorage, VecStorage};
 use specs::Entity;
-use specs::saveload::{SaveLoadComponent, U64Marker};
+use specs::saveload::{Marker, SaveLoadComponent};
 
 
 use std::error::Error;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::fmt;
 
 #[derive(Component, Copy, Clone, PartialEq, Serialize, Deserialize)]
@@ -45,43 +45,43 @@ pub struct Move {
 }
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
-pub enum MarkedMoveTarget {
+pub enum MarkedMoveTarget<M: Marker> {
     Ground(Pos),
-    Unit(U64Marker),
+    Unit(#[serde(bound = "M: Marker")] M),
 }
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
-pub struct MoveData {
+pub struct MoveData<M: Marker> {
     pub behavior: MoveBehavior,
     pub attacking: MoveAttack,
-    pub target: MarkedMoveTarget,
+    #[serde(bound = "M: Marker")] pub target: MarkedMoveTarget<M>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum NoTargetError {
+pub enum NoTargetError<M: Marker> {
     Entity(Entity),
-    Marker(U64Marker),
+    Marker(M),
 }
 
-impl Display for NoTargetError {
+impl<M: Marker + Debug> Display for NoTargetError<M> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(formatter, "Target not found: {:?}", self)
     }
 }
 
-impl Error for NoTargetError {
+impl<M: Marker + Debug> Error for NoTargetError<M> {
     fn description(&self) -> &str {
         "Could not find target when (de)serializing"
     }
 }
 
-impl SaveLoadComponent<U64Marker> for Move {
-    type Data = MoveData;
-    type Error = NoTargetError;
+impl<M: Marker + Debug> SaveLoadComponent<M> for Move {
+    type Data = MoveData<M>;
+    type Error = NoTargetError<M>;
 
-    fn save<F>(&self, mut ids: F) -> Result<MoveData, Self::Error>
+    fn save<F>(&self, mut ids: F) -> Result<MoveData<M>, Self::Error>
     where
-        F: FnMut(Entity) -> Option<U64Marker>,
+        F: FnMut(Entity) -> Option<M>,
     {
         Ok(MoveData {
             behavior: self.behavior,
@@ -95,9 +95,9 @@ impl SaveLoadComponent<U64Marker> for Move {
         })
     }
 
-    fn load<F>(data: MoveData, mut ids: F) -> Result<Self, Self::Error>
+    fn load<F>(data: MoveData<M>, mut ids: F) -> Result<Self, Self::Error>
     where
-        F: FnMut(U64Marker) -> Option<Entity>,
+        F: FnMut(M) -> Option<Entity>,
     {
         Ok(Move {
             behavior: data.behavior,
