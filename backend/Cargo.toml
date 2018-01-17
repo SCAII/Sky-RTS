@@ -11,7 +11,8 @@ scaii_defs = {git = "https://github.com/SCAII/SCAII", branch="glue"}
 rlua  = "0.9"
 serde = "1"
 serde_derive = "1"
-rand = { git = 'https://github.com/LinearZoetrope/rand', branch="serde", features=["serde-1"] }
+# My rand patch, change this when it gets merged into rand
+rand = { version="0.4", git = 'https://github.com/LinearZoetrope/rand', branch="serde", features=["serde-1"] }
 bincode = "0.9"
 # we need saveload. Fix this when specs hits 0.11
 specs = { version="0.10", features=["serde"], git="https://github.com/slide-rs/specs"}
@@ -25,6 +26,11 @@ bytes = "0.4.5"
 
 nalgebra = {version="0.13", features=["serde-serialize"]}
 
+lazy_static = "1.0"
+
 [build-dependencies]
 prost-build = "0.2"
 glob = "0.2.11"
+
+[dev-dependencies]
+websocket = "0.20"

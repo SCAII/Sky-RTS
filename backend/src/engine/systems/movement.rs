@@ -1,10 +1,11 @@
 use specs::{Entities, Entity, Fetch, ReadStorage, System, WriteStorage};
-use engine::components::{Move, MoveBehavior, MoveTarget, MovedFlag, Pos};
+use engine::components::{Move, MoveBehavior, MoveTarget, MovedFlag, Pos, Speed};
 use engine::DeltaT;
 
 #[derive(SystemData)]
 pub struct MoveSystemData<'a> {
     positions: WriteStorage<'a, Pos>,
+    speeds: ReadStorage<'a, Speed>,
     moves: ReadStorage<'a, Move>,
     moved: WriteStorage<'a, MovedFlag>,
     delta_t: Fetch<'a, DeltaT>,
@@ -15,7 +16,7 @@ pub struct MoveSystemData<'a> {
 pub struct MoveSystem {
     // Reduce allocations by caching the largest the list
     // of deferred target seeks has ever been
-    target_cache: Vec<(Entity, Move)>,
+    target_cache: Vec<(Entity, Entity)>,
 }
 
 impl MoveSystem {
@@ -26,7 +27,6 @@ impl MoveSystem {
     }
 }
 
-
 impl<'a> System<'a> for MoveSystem {
     type SystemData = MoveSystemData<'a>;
 
@@ -35,39 +35,59 @@ impl<'a> System<'a> for MoveSystem {
 
         let targets = &mut self.target_cache;
 
-        for (pos, moves, id) in (&mut sys_data.positions, &sys_data.moves, &*sys_data.ids).join() {
+        for (pos, moves, speed, id) in (
+            &mut sys_data.positions,
+            &sys_data.moves,
+            &sys_data.speeds,
+            &*sys_data.ids,
+        ).join()
+        {
             sys_data.moved.insert(id, MovedFlag);
 
             match *moves {
                 // For borrow reasons, we need to defer targeted moves until later
                 // (we can't get a position while iterating over positions!)
-                target @ Move {
-                    target: MoveTarget::Unit(_),
+                Move {
+                    target: MoveTarget::Unit(target),
                     ..
                 } => {
-                    targets.push((id, target.clone()));
+                    targets.push((id, target));
                     continue;
                 }
                 Move {
                     target: MoveTarget::Ground(ref tar_pos),
                     ref behavior,
-                } => move_ground(pos, tar_pos, behavior, sys_data.delta_t.0),
+                } => move_ground(pos, tar_pos, behavior, sys_data.delta_t.0, speed.0),
             }
         }
 
-        for (_id, _target) in targets.drain(..) {}
+        for (id, target) in targets.drain(..) {
+            let tar_pos = match sys_data.positions.get(target) {
+                None => continue,
+                Some(pos) => pos.clone(),
+            };
+            let pos = sys_data.positions.get_mut(id).unwrap();
+            let speed = sys_data.speeds.get(id).unwrap();
+
+            move_ground(
+                pos,
+                &tar_pos,
+                &MoveBehavior::Straight,
+                sys_data.delta_t.0,
+                speed.0,
+            )
+        }
     }
 }
 
-
-fn move_ground(pos: &mut Pos, tar_pos: &Pos, behavior: &MoveBehavior, delta_t: f64) {
+fn move_ground(pos: &mut Pos, tar_pos: &Pos, behavior: &MoveBehavior, delta_t: f64, speed: f64) {
     match *behavior {
         MoveBehavior::Straight => {
             let dir = **tar_pos - **pos;
 
-            let mut new_pos = **pos + (dir.normalize() * delta_t);
+            let mut new_pos = **pos + (dir.normalize() * delta_t * speed);
 
-            let new_dir = new_pos - **tar_pos;
+            let new_dir = **tar_pos - new_pos;
 
             /* Simple overshoot detection */
 
@@ -81,6 +101,5 @@ fn move_ground(pos: &mut Pos, tar_pos: &Pos, behavior: &MoveBehavior, delta_t: f
 
             **pos = new_pos;
         }
-        MoveBehavior::Arrive => unimplemented!(),
     }
 }

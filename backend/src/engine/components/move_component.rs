@@ -4,14 +4,20 @@ use std::fmt;
 
 use super::Pos;
 
-use specs::{Entity, HashMapStorage};
+use specs::{Entity, HashMapStorage, NullStorage, VecStorage};
 use specs::saveload::{Marker, SaveLoadComponent};
 
+#[derive(Copy, Clone, Default, Component, PartialEq, Serialize, Deserialize)]
+#[component(VecStorage)]
+pub struct Speed(pub f64);
+
+#[derive(Copy, Clone, Default, Component, PartialEq, Serialize, Deserialize)]
+#[component(NullStorage)]
+pub struct Movable;
 
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum MoveBehavior {
     Straight,
-    Arrive,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -36,7 +42,8 @@ pub enum MarkedMoveTarget<M: Marker> {
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct MoveData<M: Marker> {
     pub behavior: MoveBehavior,
-    #[serde(bound = "M: Marker")] pub target: MarkedMoveTarget<M>,
+    #[serde(bound = "M: Marker")]
+    pub target: MarkedMoveTarget<M>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -69,9 +76,9 @@ impl<M: Marker + Debug> SaveLoadComponent<M> for Move {
             behavior: self.behavior,
             target: match self.target {
                 MoveTarget::Ground(pos) => MarkedMoveTarget::Ground(pos),
-                MoveTarget::Unit(entity) => MarkedMoveTarget::Unit(
-                    ids(entity).ok_or_else(|| NoTargetError::Entity(entity))?,
-                ),
+                MoveTarget::Unit(entity) => {
+                    MarkedMoveTarget::Unit(ids(entity).ok_or_else(|| NoTargetError::Entity(entity))?)
+                }
             },
         })
     }

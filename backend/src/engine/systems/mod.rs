@@ -1,2 +1,4 @@
 pub mod movement;
-pub mod init;
+pub mod proto_render;
+pub mod lua;
+pub mod input;
