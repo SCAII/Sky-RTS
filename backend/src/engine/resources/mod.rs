@@ -5,6 +5,10 @@ use super::components::Shape;
 
 use scaii_defs::protos::{Action, Viz};
 
+pub mod collision;
+
+pub use self::collision::*;
+
 /// The current episode, only meaningful for sequential runs.
 #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub struct Episode(pub usize);

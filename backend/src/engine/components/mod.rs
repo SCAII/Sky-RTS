@@ -15,11 +15,13 @@ use scaii_defs::protos::Color as ScaiiColor;
 // just be named things like `render` rather than
 // `render_component`.
 mod move_component;
+mod collision;
 
 pub use self::move_component::*;
+pub use self::collision::*;
 
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Pos(Vector2<f64>);
+pub struct Pos(pub Vector2<f64>);
 
 impl Pos {
     pub fn new(x: f64, y: f64) -> Self {
