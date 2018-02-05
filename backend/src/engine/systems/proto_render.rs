@@ -1,5 +1,5 @@
 use specs::{Entities, Fetch, FetchMut, Join, ReadStorage, System};
-use engine::components::{Color, MovedFlag, Pos, Shape};
+use engine::components::{Color, Death, MovedFlag, Pos, Shape};
 use engine::{NeedsKeyInfo, Render};
 
 use scaii_defs::protos::Entity as ScaiiEntity;
@@ -11,6 +11,7 @@ pub struct RenderSystemData<'a> {
     pos: ReadStorage<'a, Pos>,
     shape: ReadStorage<'a, Shape>,
     moved: ReadStorage<'a, MovedFlag>,
+    death: ReadStorage<'a, Death>,
     ids: Entities<'a>,
 
     out: FetchMut<'a, Render>,
@@ -36,16 +37,20 @@ impl RenderSystem {
         let out = &mut sys_data.out.0;
         out.entities.clear();
 
-        for (pos, id, _) in (
+        for (pos, id) in (
             &sys_data.pos,
             &*sys_data.ids,
-            &sys_data.moved, // Just a filter
+            // &sys_data.moved, // Just a filter
         ).join()
         {
+            if !sys_data.moved.get(id).is_some() || !sys_data.death.get(id).is_some() {
+                continue;
+            }
+
             let entity = ScaiiEntity {
                 id: id.id() as u64,
                 pos: Some(pos.to_scaii_pos()),
-                delete: false,
+                delete: sys_data.death.get(id).is_some(),
                 shapes: vec![],
             };
 
@@ -72,7 +77,7 @@ impl RenderSystem {
             let entity = ScaiiEntity {
                 shapes: vec![scaii_shape],
                 id: id.id() as u64,
-                delete: false,
+                delete: sys_data.death.get(id).is_some(),
                 pos: Some(pos.to_scaii_pos()),
             };
 

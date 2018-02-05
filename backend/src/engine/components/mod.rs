@@ -1,8 +1,10 @@
 use nalgebra::Point2;
 
-use specs::{Component, FlaggedStorage, NullStorage, VecStorage, World};
+use specs::{Component, Entity, FlaggedStorage, HashMapStorage, NullStorage, VecStorage, World};
+use specs::saveload::{Marker, SaveLoadComponent};
 
 use std::ops::{Deref, DerefMut};
+use std::fmt::Debug;
 
 use scaii_defs::protos::Pos as ScaiiPos;
 use scaii_defs::protos::Shape as ScaiiShape;
@@ -39,6 +41,7 @@ pub(super) fn register_world_components(world: &mut World) {
     world.register::<AttackSensor>();
     world.register::<CollisionHandle>();
     world.register::<UnitTypeTag>();
+    world.register::<Attack>();
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -162,3 +165,42 @@ pub struct FactionId(pub usize);
 #[derive(Clone, Eq, PartialEq, Hash, Default, Debug, Serialize, Deserialize, Component)]
 #[component(VecStorage)]
 pub struct UnitTypeTag(pub String);
+
+#[derive(Clone, PartialEq, Debug, Component)]
+#[component(HashMapStorage)]
+pub struct Attack {
+    pub target: Entity,
+    pub time_since_last: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AttackData<M: Marker + Debug>(#[serde(bound = "M: Marker")] pub M, pub f64);
+
+impl<M: Marker + Debug> SaveLoadComponent<M> for Attack {
+    type Data = AttackData<M>;
+    type Error = NoTargetError<M>;
+
+    fn save<F>(&self, mut ids: F) -> Result<AttackData<M>, Self::Error>
+    where
+        F: FnMut(Entity) -> Option<M>,
+    {
+        Ok(AttackData(
+            ids(self.target).ok_or_else(|| NoTargetError::Entity(self.target))?,
+            self.time_since_last,
+        ))
+    }
+
+    fn load<F>(data: AttackData<M>, mut ids: F) -> Result<Self, Self::Error>
+    where
+        F: FnMut(M) -> Option<Entity>,
+    {
+        Ok(Attack {
+            target: ids(data.0).ok_or_else(|| NoTargetError::Marker(data.0))?,
+            time_since_last: data.1,
+        })
+    }
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Component)]
+#[component(NullStorage)]
+pub struct Death;

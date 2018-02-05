@@ -29,6 +29,7 @@ impl<'a, 'b> Rts<'a, 'b> {
         use self::systems::movement::MoveSystem;
         use self::systems::input::InputSystem;
         use self::systems::proto_render::RenderSystem;
+        use self::systems::collision::CollisionSystem;
 
         let mut world = World::new();
         components::register_world_components(&mut world);
@@ -37,6 +38,7 @@ impl<'a, 'b> Rts<'a, 'b> {
         let simulation_builder: Dispatcher = DispatcherBuilder::new()
             .add(InputSystem::new(), "input", &[])
             .add(MoveSystem::new(), "movement", &["input"])
+            .add(CollisionSystem, "collision", &["movement"])
             .build();
 
         let output_builder = DispatcherBuilder::new()

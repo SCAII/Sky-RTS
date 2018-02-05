@@ -38,6 +38,22 @@ pub struct Move {
     pub target: MoveTarget,
 }
 
+impl Move {
+    pub fn is_attacking(&self) -> bool {
+        match self.target {
+            MoveTarget::Unit(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn attack_target(&self) -> Option<Entity> {
+        match self.target {
+            MoveTarget::Unit(id) => Some(id),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub enum MarkedMoveTarget<M: Marker> {
     Ground(Pos),

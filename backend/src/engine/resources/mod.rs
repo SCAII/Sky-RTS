@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use super::FactionId;
-use super::components::{AttackSensor, CollisionHandle, Color, Pos, Shape};
+use super::components::{AttackSensor, CollisionHandle, Color, Hp, Pos, Shape};
 
 use scaii_defs::protos::{Action, Viz};
 
@@ -86,7 +86,7 @@ pub struct ActionInput(pub Option<Action>);
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct UnitType {
     pub tag: String,
-    pub max_hp: usize,
+    pub max_hp: f64,
     pub movable: bool,
     pub shape: Shape,
     pub kill_reward: f64,
@@ -95,13 +95,15 @@ pub struct UnitType {
     pub damage_recv_penalty: Option<f64>,
     pub speed: f64,
     pub attack_range: f64,
+    pub attack_damage: f64,
+    pub attack_delay: f64,
 }
 
 impl Default for UnitType {
     fn default() -> Self {
         UnitType {
             tag: "".to_string(),
-            max_hp: 100,
+            max_hp: 100.0,
             movable: true,
             shape: Shape::Triangle { base_len: 10.0 },
             kill_reward: 0.0,
@@ -110,6 +112,8 @@ impl Default for UnitType {
             damage_recv_penalty: None,
             speed: 20.0,
             attack_range: 10.0,
+            attack_delay: 1.0,
+            attack_damage: 10.0,
         }
     }
 }
@@ -136,6 +140,10 @@ impl UnitType {
                 .with(color)
                 .with(FactionId(faction))
                 .with(UnitTypeTag(self.tag.clone()))
+                .with(Hp {
+                    max_hp: self.max_hp,
+                    curr_hp: self.max_hp,
+                })
                 .marked::<U64Marker>();
 
             if self.movable {

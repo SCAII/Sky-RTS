@@ -207,6 +207,16 @@ impl LuaSystem {
                     } else {
                         default.attack_range
                     },
+                    attack_delay: if unit_type.contains_key("attack_delay")? {
+                        unit_type.get("attack_delay")?
+                    } else {
+                        default.attack_delay
+                    },
+                    attack_damage: if unit_type.contains_key("attack_damage")? {
+                        unit_type.get("attack_damage")?
+                    } else {
+                        default.attack_damage
+                    },
                     ..UnitType::default()
                 };
 
