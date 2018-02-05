@@ -42,6 +42,7 @@ pub(super) fn register_world_components(world: &mut World) {
     world.register::<CollisionHandle>();
     world.register::<UnitTypeTag>();
     world.register::<Attack>();
+    world.register::<Death>();
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
