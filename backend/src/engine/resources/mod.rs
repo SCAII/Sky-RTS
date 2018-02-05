@@ -146,8 +146,8 @@ impl UnitType {
             Shape::Triangle { base_len } => {
                 let base_len = base_len / COLLISION_SCALE;
 
-                /* equilateral triangle */
-                let half_height = base_len / ((2.0 as f64).sqrt()) / 2.0;
+                // equilateral triangle dimensions
+                let half_height = base_len / (2.0 as f64).sqrt() / 2.0;
                 let radius = base_len / 2.0;
 
                 // A cylinder in 2D is an isoscelese triangle in ncollide
@@ -164,22 +164,24 @@ impl UnitType {
 
         let color = { world.read_resource::<Vec<Player>>()[faction].color };
 
-        let entity = world
-            .create_entity()
-            .with(pos)
-            .with(self.shape)
-            .with(color)
-            .with(FactionId(faction))
-            .marked::<U64Marker>();
+        // Scoping for borrow shenanigans
+        let entity = {
+            let entity = world
+                .create_entity()
+                .with(pos)
+                .with(self.shape)
+                .with(color)
+                .with(FactionId(faction))
+                .marked::<U64Marker>();
 
-        let entity = if self.movable {
-            entity.with(Movable).with(Speed(self.speed))
-        } else {
-            entity.with(Static)
+            if self.movable {
+                entity.with(Movable).with(Speed(self.speed))
+            } else {
+                entity.with(Static)
+            }
         }.build();
 
         // We need the entity ID for this, so do it after building the entity and then add the component.
-
         let (collider, atk_radius) = {
             let pos = Isometry2::new(
                 Vector2::new(pos.x / COLLISION_SCALE, pos.y / COLLISION_SCALE),
