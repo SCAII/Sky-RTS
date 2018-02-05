@@ -171,13 +171,13 @@ impl UnitType {
         use nalgebra;
 
         let mut collider_group = CollisionGroups::new();
-        collider_group.modify_membership(faction - 1, true);
+        collider_group.modify_membership(faction, true);
 
         let mut sensor_group = CollisionGroups::new();
-        sensor_group.modify_membership(MAX_FACTIONS + (faction - 1), true);
+        sensor_group.modify_membership(MAX_FACTIONS + faction, true);
         sensor_group.set_blacklist(&SENSOR_BLACKLIST);
 
-        let (collider, atk_radius): (ShapeHandle<_, _>, ShapeHandle<_, _>) = match self.shape {
+        let (collider, atk_radius) = match self.shape {
             Shape::Rect { width, height } => {
                 let width = width / COLLISION_SCALE;
                 let height = height / COLLISION_SCALE;
