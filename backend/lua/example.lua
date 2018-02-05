@@ -62,7 +62,7 @@ function sky_init()
         damage_deal_reward=0,
         speed=40.0,
         attack_range=1.0,
-        attack_dmg=15,
+        attack_dmg=10,
         attack_delay=1.0,
     }
 
@@ -85,7 +85,7 @@ function sky_init()
 
     unit_types[3] = {
         tag="big_tower",
-        max_hp=500,
+        max_hp=100,
         shape = {
             body="rect",
             width=40.0,
