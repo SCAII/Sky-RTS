@@ -17,26 +17,28 @@ use scaii_defs::protos::Color as ScaiiColor;
 mod move_component;
 mod collision;
 
+pub use self::move_component::*;
+pub use self::collision::*;
+
 pub(super) fn register_world_components(world: &mut World) {
     use specs::saveload::U64Marker;
 
-    world.register::<self::Pos>();
-    world.register::<self::Heading>();
-    world.register::<self::Move>();
-    world.register::<self::Movable>();
-    world.register::<self::Static>();
-    world.register::<self::MovedFlag>();
-    world.register::<self::Hp>();
-    world.register::<self::Damage>();
-    world.register::<self::Shape>();
-    world.register::<self::Color>();
-    world.register::<self::Speed>();
+    world.register::<Pos>();
+    world.register::<Heading>();
+    world.register::<Move>();
+    world.register::<Movable>();
+    world.register::<Static>();
+    world.register::<MovedFlag>();
+    world.register::<Hp>();
+    world.register::<Damage>();
+    world.register::<Shape>();
+    world.register::<Color>();
+    world.register::<Speed>();
     world.register::<U64Marker>();
     world.register::<FactionId>();
+    world.register::<AttackSensor>();
+    world.register::<CollisionHandle>();
 }
-
-pub use self::move_component::*;
-pub use self::collision::*;
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Pos(pub Point2<f64>);

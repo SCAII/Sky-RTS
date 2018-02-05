@@ -89,9 +89,8 @@ impl LuaSystem {
     }
 
     pub fn reset(&mut self, world: &mut World) -> Result<(), Box<Error>> {
-        use engine::components::{FactionId, Movable, Pos, Speed, Static};
-        use engine::resources::{Player, UnitTypeMap};
-        use specs::saveload::U64Marker;
+        use engine::components::Pos;
+        use engine::resources::UnitTypeMap;
 
         let units: Table = self.lua
             .eval("sky_reset(__sky_rts_rng)", Some("Restart function"))?;
@@ -115,21 +114,7 @@ impl LuaSystem {
                     .clone()
             };
 
-            let color = { world.read_resource::<Vec<Player>>()[faction].color };
-
-            let entity = world
-                .create_entity()
-                .with(pos)
-                .with(template.shape)
-                .with(color)
-                .with(FactionId(faction))
-                .marked::<U64Marker>();
-
-            if template.movable {
-                entity.with(Movable).with(Speed(template.speed))
-            } else {
-                entity.with(Static)
-            }.build();
+            template.build_entity(world, pos, faction);
         }
 
         Ok(())
@@ -217,6 +202,11 @@ impl LuaSystem {
                         unit_type.get("speed")?
                     } else {
                         default.speed
+                    },
+                    attack_range: if unit_type.contains_key("attack_range")? {
+                        unit_type.get("attack_range")?
+                    } else {
+                        default.attack_range
                     },
                     ..UnitType::default()
                 };

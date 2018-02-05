@@ -61,6 +61,7 @@ function sky_init()
         damage_recv_penalty=0,
         damage_deal_reward=0,
         speed=40.0,
+        attack_range=1.0,
     }
 
     unit_types[2] = {
@@ -75,6 +76,7 @@ function sky_init()
         kill_reward=100,
         damage_recv_penalty=0,
         damage_deal_reward=0,
+        attack_range=10.0,
     }
 
     unit_types[3] = {
@@ -89,6 +91,7 @@ function sky_init()
         kill_reward=1000,
         damage_recv_penalty=0,
         damage_deal_reward=0,
+        attack_range=10.0,
     }
 
     return {
