@@ -3,6 +3,7 @@ extern crate bytes;
 #[macro_use]
 extern crate lazy_static;
 extern crate nalgebra;
+extern crate ncollide;
 extern crate ndarray;
 extern crate prost;
 #[macro_use]
@@ -23,6 +24,7 @@ extern crate specs_derive;
 pub mod engine;
 pub(crate) mod util;
 pub mod protos;
+pub mod error;
 
 use engine::Rts;
 

@@ -1,6 +1,6 @@
-use nalgebra::Vector2;
+use nalgebra::Point2;
 
-use specs::{Component, FlaggedStorage, NullStorage, VecStorage};
+use specs::{Component, FlaggedStorage, NullStorage, VecStorage, World};
 
 use std::ops::{Deref, DerefMut};
 
@@ -17,15 +17,33 @@ use scaii_defs::protos::Color as ScaiiColor;
 mod move_component;
 mod collision;
 
+pub(super) fn register_world_components(world: &mut World) {
+    use specs::saveload::U64Marker;
+
+    world.register::<self::Pos>();
+    world.register::<self::Heading>();
+    world.register::<self::Move>();
+    world.register::<self::Movable>();
+    world.register::<self::Static>();
+    world.register::<self::MovedFlag>();
+    world.register::<self::Hp>();
+    world.register::<self::Damage>();
+    world.register::<self::Shape>();
+    world.register::<self::Color>();
+    world.register::<self::Speed>();
+    world.register::<U64Marker>();
+    world.register::<FactionId>();
+}
+
 pub use self::move_component::*;
 pub use self::collision::*;
 
-#[derive(Copy, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Pos(pub Vector2<f64>);
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Pos(pub Point2<f64>);
 
 impl Pos {
     pub fn new(x: f64, y: f64) -> Self {
-        Pos(Vector2::new(x, y))
+        Pos(Point2::new(x, y))
     }
 
     pub fn to_scaii_pos(&self) -> ScaiiPos {
@@ -41,7 +59,7 @@ impl Component for Pos {
 }
 
 impl Deref for Pos {
-    type Target = Vector2<f64>;
+    type Target = Point2<f64>;
 
     fn deref(&self) -> &Self::Target {
         &self.0

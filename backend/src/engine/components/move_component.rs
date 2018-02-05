@@ -15,6 +15,11 @@ pub struct Speed(pub f64);
 #[component(NullStorage)]
 pub struct Movable;
 
+// Opposite of movable for entities with a shape that can't be moved
+#[derive(Copy, Clone, Default, Component, PartialEq, Serialize, Deserialize)]
+#[component(NullStorage)]
+pub struct Static;
+
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum MoveBehavior {
     Straight,

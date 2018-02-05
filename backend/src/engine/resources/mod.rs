@@ -5,9 +5,37 @@ use super::components::Shape;
 
 use scaii_defs::protos::{Action, Viz};
 
+use specs::World;
+
 pub mod collision;
 
 pub use self::collision::*;
+
+// Recommended by ncollide
+const COLLISION_MARGIN: f64 = 0.02;
+use super::SIXTY_FPS;
+
+pub(super) fn register_world_resources(world: &mut World) {
+    use util;
+    use specs::saveload::U64MarkerAllocator;
+    use ncollide::world::CollisionWorld;
+    use nalgebra::{Isometry2, Point2};
+
+    let rng = util::make_rng();
+    world.add_resource(rng);
+    world.add_resource(Episode(0));
+    world.add_resource(Terminal(false));
+    world.add_resource(DeltaT(SIXTY_FPS));
+    world.add_resource(Render::default());
+    world.add_resource(NeedsKeyInfo(true));
+    world.add_resource::<Vec<Player>>(Vec::new());
+    world.add_resource(UnitTypeMap::default());
+    world.add_resource(U64MarkerAllocator::new());
+    world.add_resource(ActionInput::default());
+    world.add_resource(CollisionWorld::<Point2<f64>, Isometry2<f64>, ()>::new(
+        COLLISION_MARGIN,
+    ));
+}
 
 /// The current episode, only meaningful for sequential runs.
 #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
