@@ -1,18 +1,27 @@
 use rlua::{Lua, Table};
 use scaii_defs::protos::Error as ScaiiError;
 
-use specs::{System, World};
+use specs::{Fetch, FetchMut, ReadStorage, System, World};
 
-use std::marker::PhantomData;
 use std::error::Error;
 use std::path::Path;
 use std::fmt::Debug;
+
+use engine::components::{Death, FactionId, UnitTypeTag};
+use engine::resources::{Reward, Terminal, UnitTypeMap};
 
 pub(crate) mod userdata;
 
 #[derive(SystemData)]
 pub struct LuaSystemData<'a> {
-    _pd: PhantomData<&'a ()>,
+    death: ReadStorage<'a, Death>,
+    faction: ReadStorage<'a, FactionId>,
+    tag: ReadStorage<'a, UnitTypeTag>,
+
+    unit_type: Fetch<'a, UnitTypeMap>,
+
+    reward: FetchMut<'a, Reward>,
+    terminal: FetchMut<'a, Terminal>,
 }
 
 pub struct LuaSystem {
@@ -21,6 +30,54 @@ pub struct LuaSystem {
 
 unsafe impl Send for LuaSystem {}
 
+impl<'a> System<'a> for LuaSystem {
+    type SystemData = LuaSystemData<'a>;
+
+    fn run(&mut self, mut sys_data: Self::SystemData) {
+        use specs::Join;
+        use self::userdata::{UserDataUnit, UserDataWorld};
+
+        sys_data.reward.0.clear();
+
+        let world = UserDataWorld { victory: None };
+        self.lua.globals().set("__sky_world", world).unwrap();
+
+        for (faction, tag, death) in (&sys_data.faction, &sys_data.tag, &sys_data.death).join() {
+            let killer_faction = sys_data.faction.get(death.killer).unwrap();
+            let friendly_kill = faction == killer_faction;
+
+            let unit1 = UserDataUnit { faction: *faction };
+            let unit2 = UserDataUnit {
+                faction: *killer_faction,
+            };
+
+            self.lua.globals().set("__sky_u1", unit1).unwrap();
+
+            self.lua.globals().set("__sky_u2", unit2).unwrap();
+
+            self.lua
+                .exec::<()>(
+                    "on_death(__sky_world, __sky_u1, __sky_u2)",
+                    Some("calling on_death"),
+                )
+                .unwrap();
+
+            let u_type = sys_data.unit_type.tag_map.get(&tag.0).unwrap();
+
+            if killer_faction.0 != 0 || friendly_kill {
+                *sys_data.reward.0.entry("death".to_string()).or_insert(0.0) +=
+                    u_type.death_penalty;
+            } else {
+                *sys_data.reward.0.entry("kill".to_string()).or_insert(0.0) += u_type.kill_reward;
+            }
+        }
+
+        let world: UserDataWorld = self.lua.globals().get("__sky_world").unwrap();
+        if world.victory.is_some() {
+            sys_data.terminal.0 = true;
+        }
+    }
+}
 impl LuaSystem {
     pub fn new() -> Self {
         LuaSystem { lua: Lua::new() }
@@ -249,10 +306,4 @@ impl LuaSystem {
 
         Ok(())
     }
-}
-
-impl<'a> System<'a> for LuaSystem {
-    type SystemData = LuaSystemData<'a>;
-
-    fn run(&mut self, _sys_data: Self::SystemData) {}
 }

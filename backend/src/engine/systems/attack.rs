@@ -43,7 +43,7 @@ impl<'a> System<'a> for AttackSystem {
                 tar_hp.curr_hp -= unit_type.attack_damage;
 
                 if tar_hp.curr_hp <= 0.0 {
-                    sys_data.death.insert(atk.target, Death);
+                    sys_data.death.insert(atk.target, Death { killer: id });
                 }
             }
         }

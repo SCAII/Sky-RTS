@@ -36,7 +36,7 @@ impl UserData for UserDataWorld {
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Debug)]
 pub struct UserDataUnit {
-    faction: FactionId,
+    pub faction: FactionId,
 }
 
 impl UserData for UserDataUnit {

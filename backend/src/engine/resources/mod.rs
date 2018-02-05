@@ -23,9 +23,9 @@ lazy_static! {
     pub static ref SENSOR_BLACKLIST: Vec<usize> = (MAX_FACTIONS..30).collect();
 
     pub static ref PLAYER_COLORS: Vec<Color> = vec![
-        Color { r: 0, g: 255, b: 0 },
         Color { r: 255, g: 0, b: 0 },
         Color { r: 0, g: 0, b: 255 },
+        Color { r: 0, g: 255, b: 0 },
     ];
 }
 

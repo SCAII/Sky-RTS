@@ -176,12 +176,14 @@ impl<'a, 'b> Rts<'a, 'b> {
     pub fn update(&mut self) -> MultiMessage {
         use scaii_defs::protos;
         use scaii_defs::protos::ScaiiPacket;
+        use specs::RunNow;
 
         if self.world.read_resource::<Terminal>().0 {
             return Default::default();
         }
 
         self.sim_systems.dispatch_seq(&self.world.res);
+        self.lua_sys.run_now(&self.world.res);
         self.out_systems.dispatch_seq(&self.world.res);
 
         self.world.maintain();

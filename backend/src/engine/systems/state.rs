@@ -56,7 +56,8 @@ impl<'a> System<'a> for StateBuildSystem {
 
                 if let Some(collider) = intersection.next() {
                     let entity = collider.data().e;
-                    self.state_cache[(i, j, 0)] = entity.id() as f64;
+                    // Need to offset by 1 because the default is 0
+                    self.state_cache[(i, j, 0)] = (entity.id() + 1) as f64;
                     self.state_cache[(i, j, 1)] = sys_data.hp.get(entity).unwrap().curr_hp as f64;
 
                     let u_type = sys_data

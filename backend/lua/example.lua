@@ -57,7 +57,7 @@ function sky_init()
             body="triangle",
             base_len=10.0
         },
-        death_penalty=100,
+        death_penalty=-100,
         damage_recv_penalty=0,
         damage_deal_reward=0,
         speed=40.0,
@@ -75,7 +75,7 @@ function sky_init()
             height=20.0
         },
         can_move=false,
-        kill_reward=100,
+        kill_reward=150,
         damage_recv_penalty=0,
         damage_deal_reward=0,
         attack_range=20.0,
@@ -112,6 +112,6 @@ function on_death(world, dead, cause)
     if dead:faction() == 1 then
         world:victory(0)
     else
-        world:defeat(0)
+        world:victory(1)
     end
 end

@@ -11,7 +11,8 @@ use std::net::TcpStream;
 use websocket::sync::Client;
 
 fn main() {
-    use scaii_defs::protos::{BackendCfg, BackendEndpoint, Cfg, CoreEndpoint, Endpoint, ScaiiPacket};
+    use scaii_defs::protos::{BackendCfg, BackendEndpoint, Cfg, CoreEndpoint, Endpoint,
+                             ScaiiPacket, State};
     use scaii_defs::protos::Action as ScaiiAction;
     use scaii_defs::protos::endpoint::Endpoint as End;
     use scaii_defs::protos::scaii_packet::SpecificMsg;
@@ -70,8 +71,13 @@ fn main() {
     };
 
     let mut conn = conn.accept().expect("Couldn't accept the connection");
-
     for packet in mm.packets {
+        match packet.dest {
+            Endpoint {
+                endpoint: Some(End::Agent(..)),
+            } => {}
+            _ => {}
+        }
         encode_and_send_proto(&mut conn, &packet).unwrap();
     }
 
@@ -103,8 +109,28 @@ fn main() {
 
     let mm = rts.get_messages();
 
+    let mut terminal = false;
+    let mut reward = 0.0;
+
     for packet in mm.packets {
-        encode_and_send_proto(&mut conn, &packet).unwrap();
+        if let ScaiiPacket {
+            dest: Endpoint {
+                endpoint: Some(End::Agent(..)),
+            },
+            specific_msg:
+                Some(SpecificMsg::State(State {
+                    terminal: term,
+                    reward: r,
+                    ..
+                })),
+            ..
+        } = packet
+        {
+            terminal = term;
+            reward += r.unwrap();
+        } else {
+            encode_and_send_proto(&mut conn, &packet).unwrap();
+        }
     }
 
     let empty_action = ScaiiPacket {
@@ -119,24 +145,36 @@ fn main() {
         })),
     };
 
-    for _ in 0..500 {
+    while !terminal {
         rts.process_msg(&empty_action).unwrap();
         let mm = rts.get_messages();
 
         for packet in mm.packets {
-            match packet.dest {
-                Endpoint {
-                    endpoint: Some(End::Agent(..)),
-                } => {
-                    continue;
-                }
-                _ => {}
+            if let ScaiiPacket {
+                dest:
+                    Endpoint {
+                        endpoint: Some(End::Agent(..)),
+                    },
+                specific_msg:
+                    Some(SpecificMsg::State(State {
+                        terminal: term,
+                        reward: r,
+                        ..
+                    })),
+                ..
+            } = packet
+            {
+                terminal = term;
+                reward += r.unwrap();
+            } else {
+                encode_and_send_proto(&mut conn, &packet).unwrap();
             }
-            encode_and_send_proto(&mut conn, &packet).unwrap();
         }
 
         sleep(Duration::from_millis(17));
     }
+
+    println!("Done! Total reward: {}", reward);
 }
 
 fn encode_and_send_proto(

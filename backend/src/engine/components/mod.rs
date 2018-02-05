@@ -202,6 +202,8 @@ impl<M: Marker + Debug> SaveLoadComponent<M> for Attack {
     }
 }
 
-#[derive(Clone, Copy, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Component)]
-#[component(NullStorage)]
-pub struct Death;
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Component)]
+#[component(HashMapStorage)]
+pub struct Death {
+    pub killer: Entity,
+}
