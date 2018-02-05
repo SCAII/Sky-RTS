@@ -47,24 +47,31 @@ impl<'a, 'b> Context<'a, 'b> {
         self.rts.diverge();
     }
 
-    fn configure(&mut self, _cfg: &BackendCfg) -> Result<(), Box<Error>> {
-        // use protos::Config;
-        // use prost::Message;
+    fn configure(&mut self, cfg: &BackendCfg) -> Result<(), Box<Error>> {
+        use protos::{Config, Scenario};
+        use prost::Message;
+        use std::env;
 
         use std::path::PathBuf;
 
-        // let _cfg = if let Some(ref bytes) = cfg.cfg_msg {
-        //     let _cfg = Config::decode(&*bytes)?;
-        // } else {
-        //     return Ok(());
-        // };
+        if let Some(ref bytes) = cfg.cfg_msg {
+            let cfg = Config::decode(&*bytes)?;
 
-        self.rts.lua_path = Some(PathBuf::from(format!(
-            "{}/lua/example.lua",
-            env!("CARGO_MANIFEST_DIR")
-        )));
+            match cfg.scenario {
+                Some(Scenario { ref path }) => {
+                    self.rts.lua_path = Some(PathBuf::from(format!(
+                        "{}/.scaii/backends/sky-rts/maps/{}.lua",
+                        env::var("HOME")?,
+                        path
+                    )));
 
-        Ok(())
+                    Ok(())
+                }
+                _ => Err(From::from("Unsupported config!")),
+            }
+        } else {
+            Ok(())
+        }
     }
 }
 

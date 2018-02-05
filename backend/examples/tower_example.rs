@@ -18,8 +18,9 @@ fn main() {
     use scaii_defs::protos::scaii_packet::SpecificMsg;
     use scaii_defs::protos::cfg::WhichModule;
 
-    use sky_rts::protos::{ActionList, AttackUnit, UnitAction};
+    use sky_rts::protos::{ActionList, AttackUnit, Scenario, UnitAction};
     use sky_rts::protos::unit_action::Action;
+    use sky_rts::protos::Config as RtsCfg;
 
     use prost::Message;
 
@@ -29,6 +30,18 @@ fn main() {
     use std::thread::sleep;
 
     println!("Setting up RTS\n");
+
+    let cfg = RtsCfg {
+        emit_viz: Some(true),
+        random_seed: None,
+        scenario: Some(Scenario {
+            path: "tower_example".to_string(),
+        }),
+    };
+
+    let mut cfg_msg: Vec<u8> = vec![];
+
+    cfg.encode(&mut cfg_msg).unwrap();
 
     let mut rts = sky_rts::new_backend();
     rts.process_msg(&ScaiiPacket {
@@ -40,7 +53,7 @@ fn main() {
         },
         specific_msg: Some(SpecificMsg::Config(Cfg {
             which_module: Some(WhichModule::BackendCfg(BackendCfg {
-                cfg_msg: None,
+                cfg_msg: Some(cfg_msg),
                 is_replay_mode: false,
             })),
         })),
