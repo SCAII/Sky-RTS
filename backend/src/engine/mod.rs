@@ -26,12 +26,8 @@ pub struct Rts<'a, 'b> {
 impl<'a, 'b> Rts<'a, 'b> {
     pub fn new() -> Self {
         use specs::DispatcherBuilder;
-        use self::systems::movement::MoveSystem;
-        use self::systems::input::InputSystem;
-        use self::systems::proto_render::RenderSystem;
-        use self::systems::collision::CollisionSystem;
-        use self::systems::attack::AttackSystem;
-        use self::systems::cleanup::CleanupSystem;
+        use self::systems::{AttackSystem, CleanupSystem, CollisionSystem, InputSystem, MoveSystem,
+                            RenderSystem};
 
         let mut world = World::new();
         components::register_world_components(&mut world);
