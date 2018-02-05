@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use super::FactionId;
-use super::components::{Pos, Shape};
+use super::components::{AttackSensor, CollisionHandle, Pos, Shape};
 
 use scaii_defs::protos::{Action, Viz};
 
-use specs::World;
+use specs::{Entity, World, WriteStorage};
 
 pub mod collision;
 
@@ -106,17 +106,60 @@ impl Default for UnitType {
 }
 
 impl UnitType {
+    /// Creates and places the unit in the game world given its initial
+    /// position and faction.
+    ///
+    /// This also initializes anything it needs such as colliders in the collision system.
     pub fn build_entity(&self, world: &mut World, pos: Pos, faction: usize) {
         use specs::saveload::U64Marker;
+
+        use engine::components::{AttackSensor, CollisionHandle, Movable, Speed, Static,
+                                 UnitTypeTag};
+
+        let color = { world.read_resource::<Vec<Player>>()[faction].color };
+
+        // Scoping for borrow shenanigans
+        let entity = {
+            let entity = world
+                .create_entity()
+                .with(pos)
+                .with(self.shape)
+                .with(color)
+                .with(FactionId(faction))
+                .with(UnitTypeTag(self.tag.clone()))
+                .marked::<U64Marker>();
+
+            if self.movable {
+                entity.with(Movable).with(Speed(self.speed))
+            } else {
+                entity.with(Static)
+            }
+        }.build();
+
+        let col_storage = world.write::<CollisionHandle>();
+
+        let atk_storage = world.write::<AttackSensor>();
+
+        let c_world = &mut *world.write_resource();
+
+        self.register_collision(entity, pos, faction, col_storage, atk_storage, c_world)
+    }
+
+    /// Registers a unit with the collision system based on its unit type
+    /// and places the collision system handles into the appropriate components
+    pub fn register_collision(
+        &self,
+        entity: Entity,
+        pos: Pos,
+        faction: usize,
+        mut col_storage: WriteStorage<CollisionHandle>,
+        mut atk_storage: WriteStorage<AttackSensor>,
+        c_world: &mut SkyCollisionWorld,
+    ) {
         use ncollide::shape::{Ball, Cuboid, Cylinder, ShapeHandle};
         use ncollide::world::{CollisionGroups, GeometricQueryType};
         use nalgebra::{Isometry2, Vector2};
         use nalgebra;
-        use std::f64;
-
-        use engine::components::{AttackSensor, CollisionHandle, Movable, Shape, Speed, Static};
-
-        /* Setup collision */
 
         let mut collider_group = CollisionGroups::new();
         collider_group.modify_membership(faction - 1, true);
@@ -162,35 +205,15 @@ impl UnitType {
             }
         };
 
-        let color = { world.read_resource::<Vec<Player>>()[faction].color };
-
-        // Scoping for borrow shenanigans
-        let entity = {
-            let entity = world
-                .create_entity()
-                .with(pos)
-                .with(self.shape)
-                .with(color)
-                .with(FactionId(faction))
-                .marked::<U64Marker>();
-
-            if self.movable {
-                entity.with(Movable).with(Speed(self.speed))
-            } else {
-                entity.with(Static)
-            }
-        }.build();
-
         // We need the entity ID for this, so do it after building the entity and then add the component.
         let (collider, atk_radius) = {
             let pos = Isometry2::new(
                 Vector2::new(pos.x / COLLISION_SCALE, pos.y / COLLISION_SCALE),
                 nalgebra::zero(),
             );
-            let collision: &mut SkyCollisionWorld = &mut *world.write_resource();
 
             let q_type = GeometricQueryType::Contacts(10.0, 10.0);
-            let collider = collision.add(
+            let collider = c_world.add(
                 pos,
                 collider,
                 collider_group,
@@ -198,7 +221,7 @@ impl UnitType {
                 ColliderData { e: entity },
             );
 
-            let atk_radius = collision.add(
+            let atk_radius = c_world.add(
                 pos,
                 atk_radius,
                 sensor_group,
@@ -209,12 +232,8 @@ impl UnitType {
             (collider, atk_radius)
         };
 
-        world
-            .write::<CollisionHandle>()
-            .insert(entity, CollisionHandle(collider));
-        world
-            .write::<AttackSensor>()
-            .insert(entity, AttackSensor(atk_radius));
+        col_storage.insert(entity, CollisionHandle(collider));
+        atk_storage.insert(entity, AttackSensor(atk_radius));
     }
 }
 

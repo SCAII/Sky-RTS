@@ -38,6 +38,7 @@ pub(super) fn register_world_components(world: &mut World) {
     world.register::<FactionId>();
     world.register::<AttackSensor>();
     world.register::<CollisionHandle>();
+    world.register::<UnitTypeTag>();
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -157,3 +158,7 @@ impl Shape {
          Deserialize, Component)]
 #[component(VecStorage)]
 pub struct FactionId(pub usize);
+
+#[derive(Clone, Eq, PartialEq, Hash, Default, Debug, Serialize, Deserialize, Component)]
+#[component(VecStorage)]
+pub struct UnitTypeTag(pub String);
