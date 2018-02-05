@@ -162,21 +162,6 @@ impl UnitType {
             }
         };
 
-        let (collider, atk_radius) = {
-            let pos = Isometry2::new(
-                Vector2::new(pos.x / COLLISION_SCALE, pos.y / COLLISION_SCALE),
-                nalgebra::zero(),
-            );
-            let collision: &mut SkyCollisionWorld = &mut *world.write_resource();
-
-            let q_type = GeometricQueryType::Contacts(10.0, 10.0);
-            let collider = collision.add(pos, collider, collider_group, q_type, ColliderData {});
-
-            let atk_radius = collision.add(pos, atk_radius, sensor_group, q_type, ColliderData {});
-
-            (collider, atk_radius)
-        };
-
         let color = { world.read_resource::<Vec<Player>>()[faction].color };
 
         let entity = world
@@ -185,15 +170,49 @@ impl UnitType {
             .with(self.shape)
             .with(color)
             .with(FactionId(faction))
-            .with(CollisionHandle(collider))
-            .with(AttackSensor(atk_radius))
             .marked::<U64Marker>();
 
-        if self.movable {
+        let entity = if self.movable {
             entity.with(Movable).with(Speed(self.speed))
         } else {
             entity.with(Static)
         }.build();
+
+        // We need the entity ID for this, so do it after building the entity and then add the component.
+
+        let (collider, atk_radius) = {
+            let pos = Isometry2::new(
+                Vector2::new(pos.x / COLLISION_SCALE, pos.y / COLLISION_SCALE),
+                nalgebra::zero(),
+            );
+            let collision: &mut SkyCollisionWorld = &mut *world.write_resource();
+
+            let q_type = GeometricQueryType::Contacts(10.0, 10.0);
+            let collider = collision.add(
+                pos,
+                collider,
+                collider_group,
+                q_type,
+                ColliderData { e: entity },
+            );
+
+            let atk_radius = collision.add(
+                pos,
+                atk_radius,
+                sensor_group,
+                q_type,
+                ColliderData { e: entity },
+            );
+
+            (collider, atk_radius)
+        };
+
+        world
+            .write::<CollisionHandle>()
+            .insert(entity, CollisionHandle(collider));
+        world
+            .write::<AttackSensor>()
+            .insert(entity, AttackSensor(atk_radius));
     }
 }
 
