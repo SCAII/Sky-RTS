@@ -65,8 +65,9 @@ impl<'a> System<'a> for StateBuildSystem {
                         .typ_ids
                         .get(&sys_data.tag.get(entity).unwrap().0)
                         .unwrap();
-                    self.state_cache[(i, j, 2)] = *u_type as f64;
-                    self.state_cache[(i, j, 3)] = sys_data.faction.get(entity).unwrap().0 as f64;
+                    self.state_cache[(i, j, 2)] = (*u_type + 1) as f64;
+                    self.state_cache[(i, j, 3)] =
+                        (sys_data.faction.get(entity).unwrap().0 + 1) as f64;
                 } else {
                     for k in 0..4 {
                         self.state_cache[(i, j, k)] = 0.0;
