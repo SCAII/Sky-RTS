@@ -150,7 +150,7 @@ impl LuaSystem {
 
             let default = UnitType::default();
 
-            for unit_type in unit_types.sequence_values::<Table>() {
+            for (i, unit_type) in unit_types.sequence_values::<Table>().enumerate() {
                 let unit_type = unit_type?;
 
                 let mut concrete = UnitType {
@@ -242,7 +242,7 @@ impl LuaSystem {
                     }
                 }
 
-                u_type_map.typ_vec.push(concrete.clone());
+                u_type_map.typ_ids.insert(concrete.tag.clone(), i);
                 u_type_map.tag_map.insert(concrete.tag.clone(), concrete);
             }
         }

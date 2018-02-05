@@ -27,7 +27,7 @@ impl<'a, 'b> Rts<'a, 'b> {
     pub fn new() -> Self {
         use specs::DispatcherBuilder;
         use self::systems::{AttackSystem, CleanupSystem, CollisionSystem, InputSystem, MoveSystem,
-                            RenderSystem};
+                            RenderSystem, StateBuildSystem};
 
         let mut world = World::new();
         components::register_world_components(&mut world);
@@ -43,6 +43,7 @@ impl<'a, 'b> Rts<'a, 'b> {
         let output_builder = DispatcherBuilder::new()
             .add(RenderSystem {}, "render", &[])
             .add(CleanupSystem, "cleanup", &["render"])
+            .add(StateBuildSystem::new(), "state", &["cleanup"])
             .build();
 
         let lua_sys = LuaSystem::new();
@@ -153,6 +154,22 @@ impl<'a, 'b> Rts<'a, 'b> {
 
         mm.packets.push(scaii_packet);
 
+        let scaii_packet = ScaiiPacket {
+            src: protos::Endpoint {
+                endpoint: Some(protos::endpoint::Endpoint::Backend(
+                    protos::BackendEndpoint {},
+                )),
+            },
+            dest: protos::Endpoint {
+                endpoint: Some(protos::endpoint::Endpoint::Agent(protos::AgentEndpoint {})),
+            },
+            specific_msg: Some(protos::scaii_packet::SpecificMsg::State(
+                self.world.read_resource::<RtsState>().0.clone(),
+            )),
+        };
+
+        mm.packets.push(scaii_packet);
+
         mm
     }
 
@@ -169,7 +186,7 @@ impl<'a, 'b> Rts<'a, 'b> {
 
         self.world.maintain();
 
-        let scaii_packet = ScaiiPacket {
+        let render_packet = ScaiiPacket {
             src: protos::Endpoint {
                 endpoint: Some(protos::endpoint::Endpoint::Backend(
                     protos::BackendEndpoint {},
@@ -185,8 +202,22 @@ impl<'a, 'b> Rts<'a, 'b> {
             )),
         };
 
+        let state_packet = ScaiiPacket {
+            src: protos::Endpoint {
+                endpoint: Some(protos::endpoint::Endpoint::Backend(
+                    protos::BackendEndpoint {},
+                )),
+            },
+            dest: protos::Endpoint {
+                endpoint: Some(protos::endpoint::Endpoint::Agent(protos::AgentEndpoint {})),
+            },
+            specific_msg: Some(protos::scaii_packet::SpecificMsg::State(
+                self.world.read_resource::<RtsState>().0.clone(),
+            )),
+        };
+
         MultiMessage {
-            packets: vec![scaii_packet],
+            packets: vec![render_packet, state_packet],
         }
     }
 

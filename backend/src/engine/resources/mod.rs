@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use super::FactionId;
 use super::components::{AttackSensor, CollisionHandle, Color, Hp, Pos, Shape};
 
-use scaii_defs::protos::{Action, Viz};
+use scaii_defs::protos::{Action, State, Viz};
 
 use specs::{Entity, World, WriteStorage};
 
@@ -20,7 +20,7 @@ pub const COLLISION_SCALE: f64 = 30.0;
 pub const MAX_FACTIONS: usize = 15;
 
 lazy_static! {
-    static ref SENSOR_BLACKLIST: Vec<usize> = (MAX_FACTIONS..30).collect();
+    pub static ref SENSOR_BLACKLIST: Vec<usize> = (MAX_FACTIONS..30).collect();
 
     pub static ref PLAYER_COLORS: Vec<Color> = vec![
         Color { r: 0, g: 255, b: 0 },
@@ -36,6 +36,7 @@ const SIXTY_FPS: f64 = 1.0 / 60.0;
 pub(super) fn register_world_resources(world: &mut World) {
     use util;
     use specs::saveload::U64MarkerAllocator;
+    use ndarray::Array3;
 
     let rng = util::make_rng();
     world.add_resource(rng);
@@ -49,7 +50,16 @@ pub(super) fn register_world_resources(world: &mut World) {
     world.add_resource(U64MarkerAllocator::new());
     world.add_resource(ActionInput::default());
     world.add_resource(SkyCollisionWorld::new(COLLISION_MARGIN));
+    world.add_resource(RtsState(State {
+        features: Array3::zeros([500, 500, 4]).into_raw_vec(),
+        feature_array_dims: vec![500, 500, 4],
+        ..Default::default()
+    }));
+    world.add_resource(Reward::default());
 }
+
+#[derive(Default, Debug, Clone, PartialEq)]
+pub struct RtsState(pub State);
 
 /// The current episode, only meaningful for sequential runs.
 #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
@@ -82,6 +92,9 @@ pub struct NeedsKeyInfo(pub bool);
 /// The actions coming from the Agent (or replay mechanism)
 #[derive(Clone, PartialEq, Default, Debug)]
 pub struct ActionInput(pub Option<Action>);
+
+#[derive(PartialEq, Default, Clone)]
+pub struct Reward(pub HashMap<String, f64>);
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct UnitType {
@@ -256,6 +269,6 @@ impl UnitType {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct UnitTypeMap {
-    pub typ_vec: Vec<UnitType>,
+    pub typ_ids: HashMap<String, usize>,
     pub tag_map: HashMap<String, UnitType>,
 }
