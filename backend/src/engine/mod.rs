@@ -30,8 +30,6 @@ impl<'a, 'b> Rts<'a, 'b> {
         use self::systems::input::InputSystem;
         use self::systems::proto_render::RenderSystem;
 
-        /* Register our comp */
-
         let mut world = World::new();
         components::register_world_components(&mut world);
         resources::register_world_resources(&mut world);
