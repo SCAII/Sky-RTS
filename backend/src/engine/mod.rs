@@ -30,6 +30,8 @@ impl<'a, 'b> Rts<'a, 'b> {
         use self::systems::input::InputSystem;
         use self::systems::proto_render::RenderSystem;
         use self::systems::collision::CollisionSystem;
+        use self::systems::attack::AttackSystem;
+        use self::systems::cleanup::CleanupSystem;
 
         let mut world = World::new();
         components::register_world_components(&mut world);
@@ -39,10 +41,12 @@ impl<'a, 'b> Rts<'a, 'b> {
             .add(InputSystem::new(), "input", &[])
             .add(MoveSystem::new(), "movement", &["input"])
             .add(CollisionSystem, "collision", &["movement"])
+            .add(AttackSystem, "attack", &["collision"])
             .build();
 
         let output_builder = DispatcherBuilder::new()
             .add(RenderSystem {}, "render", &[])
+            .add(CleanupSystem, "cleanup", &["render"])
             .build();
 
         let lua_sys = LuaSystem::new();

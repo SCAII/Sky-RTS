@@ -6,7 +6,7 @@ use engine::DeltaT;
 pub struct MoveSystemData<'a> {
     positions: WriteStorage<'a, Pos>,
     speeds: ReadStorage<'a, Speed>,
-    moves: ReadStorage<'a, Move>,
+    moves: WriteStorage<'a, Move>,
     moved: WriteStorage<'a, MovedFlag>,
     delta_t: Fetch<'a, DeltaT>,
     ids: Entities<'a>,
@@ -62,6 +62,10 @@ impl<'a> System<'a> for MoveSystem {
         }
 
         for (id, target) in targets.drain(..) {
+            if !sys_data.ids.is_alive(target) {
+                sys_data.moves.remove(target);
+                continue;
+            }
             let tar_pos = match sys_data.positions.get(target) {
                 None => continue,
                 Some(pos) => pos.clone(),

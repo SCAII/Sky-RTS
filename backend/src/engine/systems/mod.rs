@@ -4,3 +4,4 @@ pub mod lua;
 pub mod input;
 pub mod attack;
 pub mod collision;
+pub mod cleanup;

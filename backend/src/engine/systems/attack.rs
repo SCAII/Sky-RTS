@@ -1,4 +1,4 @@
-use specs::{Fetch, ReadStorage, System, WriteStorage};
+use specs::{Entities, Fetch, ReadStorage, System, WriteStorage};
 use engine::components::{Attack, Death, Hp, UnitTypeTag};
 use engine::resources::{DeltaT, UnitTypeMap};
 
@@ -11,6 +11,7 @@ pub struct AttackSystemData<'a> {
     delta_t: Fetch<'a, DeltaT>,
     unit_type_map: Fetch<'a, UnitTypeMap>,
     tag: ReadStorage<'a, UnitTypeTag>,
+    entities: Entities<'a>,
 }
 
 pub struct AttackSystem;
@@ -23,7 +24,13 @@ impl<'a> System<'a> for AttackSystem {
 
         let delta_t = sys_data.delta_t.0;
 
-        for (atk, tag) in (&mut sys_data.attack, &sys_data.tag).join() {
+        let mut dead_target = vec![];
+
+        for (atk, tag, id) in (&mut sys_data.attack, &sys_data.tag, &*sys_data.entities).join() {
+            if !sys_data.entities.is_alive(atk.target) {
+                dead_target.push(id);
+                continue;
+            }
             let unit_type = sys_data.unit_type_map.tag_map.get(&tag.0).unwrap();
 
             atk.time_since_last += delta_t;
@@ -39,6 +46,10 @@ impl<'a> System<'a> for AttackSystem {
                     sys_data.death.insert(atk.target, Death);
                 }
             }
+        }
+
+        for id in dead_target {
+            sys_data.attack.remove(id);
         }
     }
 }
