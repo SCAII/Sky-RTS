@@ -224,6 +224,6 @@ mod tests {
 
         assert!(rts.world.read_resource::<Vec<Player>>().len() == 2);
 
-        let mm = rts.reset();
+        let _mm = rts.reset();
     }
 }
