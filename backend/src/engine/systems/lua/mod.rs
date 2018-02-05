@@ -212,8 +212,8 @@ impl LuaSystem {
                     } else {
                         default.attack_delay
                     },
-                    attack_damage: if unit_type.contains_key("attack_damage")? {
-                        unit_type.get("attack_damage")?
+                    attack_damage: if unit_type.contains_key("attack_dmg")? {
+                        unit_type.get("attack_dmg")?
                     } else {
                         default.attack_damage
                     },

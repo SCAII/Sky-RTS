@@ -96,7 +96,6 @@ fn acquire_target<'a>(
     faction2: usize,
 ) {
     use std::f64;
-
     let explicit_atk = {
         let move_order = moving.get_mut(me);
         if move_order.is_some() {

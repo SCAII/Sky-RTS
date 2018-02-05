@@ -51,8 +51,8 @@ pub(super) fn register_world_resources(world: &mut World) {
     world.add_resource(ActionInput::default());
     world.add_resource(SkyCollisionWorld::new(COLLISION_MARGIN));
     world.add_resource(RtsState(State {
-        features: Array3::zeros([500, 500, 4]).into_raw_vec(),
-        feature_array_dims: vec![500, 500, 4],
+        features: Array3::zeros([100, 100, 4]).into_raw_vec(),
+        feature_array_dims: vec![100, 100, 4],
         ..Default::default()
     }));
     world.add_resource(Reward::default());
@@ -196,7 +196,7 @@ impl UnitType {
 
         let mut sensor_group = CollisionGroups::new();
         sensor_group.modify_membership(MAX_FACTIONS + faction, true);
-        sensor_group.set_blacklist(&SENSOR_BLACKLIST);
+        // sensor_group.set_blacklist(&SENSOR_BLACKLIST);
 
         let (collider, atk_radius) = match self.shape {
             Shape::Rect { width, height } => {
@@ -204,10 +204,7 @@ impl UnitType {
                 let height = height / COLLISION_SCALE;
 
                 // ncollide likes half widths and heights, so divide by 2
-                let collider = Cuboid::new(Vector2::new(
-                    width / COLLISION_SCALE / 2.0,
-                    height / COLLISION_SCALE / 2.0,
-                ));
+                let collider = Cuboid::new(Vector2::new(width / 2.0, height / 2.0));
                 let collider = ShapeHandle::new(collider);
 
                 let atk_radius = width.max(height) + (self.attack_range / COLLISION_SCALE);
@@ -242,7 +239,7 @@ impl UnitType {
                 nalgebra::zero(),
             );
 
-            let q_type = GeometricQueryType::Contacts(10.0, 10.0);
+            let q_type = GeometricQueryType::Contacts(0.0, 0.0);
             let collider = c_world.add(
                 pos,
                 collider,

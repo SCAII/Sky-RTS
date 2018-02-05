@@ -23,7 +23,7 @@ pub struct StateBuildSystem {
 impl StateBuildSystem {
     pub fn new() -> Self {
         StateBuildSystem {
-            state_cache: Array3::zeros([500, 500, 4]),
+            state_cache: Array3::zeros([100, 100, 4]),
         }
     }
 }
@@ -46,9 +46,12 @@ impl<'a> System<'a> for StateBuildSystem {
         c_group.set_blacklist(&SENSOR_BLACKLIST);
 
         /* This is probably speed uppable using the Dead and Moved marker components */
-        for i in 0..500 {
-            for j in 0..500 {
-                let pt = Point2::new((i as f64) / COLLISION_SCALE, (j as f64) / COLLISION_SCALE);
+        for i in 0..100 {
+            for j in 0..100 {
+                let pt = Point2::new(
+                    ((i * 5) as f64) / COLLISION_SCALE,
+                    ((j * 5) as f64) / COLLISION_SCALE,
+                );
                 let mut intersection = c_world.interferences_with_point(&pt, &c_group);
 
                 if let Some(collider) = intersection.next() {
@@ -72,20 +75,20 @@ impl<'a> System<'a> for StateBuildSystem {
         }
 
         let old_state = mem::replace(&mut sys_data.state.0.features, vec![]);
-        let new_cache = Array3::from_shape_vec([500, 500, 4], old_state).unwrap();
+        let new_cache = Array3::from_shape_vec([100, 100, 4], old_state).unwrap();
 
         sys_data.state.0.features = mem::replace(&mut self.state_cache, new_cache).into_raw_vec();
 
         mem::swap(&mut sys_data.state.0.typed_reward, &mut sys_data.reward.0);
         sys_data.state.0.terminal = sys_data.terminal.0;
 
-        sys_data.state.0.reward = Some(sys_data
-            .state
-            .0
-            .typed_reward
-            .values()
-            .fold(0.0, |acc, v| acc + v));
-
-        // sys_data.state.features = self.state_cache
+        sys_data.state.0.reward = Some(
+            sys_data
+                .state
+                .0
+                .typed_reward
+                .values()
+                .fold(0.0, |acc, v| acc + v),
+        );
     }
 }

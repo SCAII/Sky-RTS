@@ -87,7 +87,7 @@ pub struct Heading(f64);
 #[component(NullStorage)]
 pub struct MovedFlag;
 
-#[derive(Default, Component, Copy, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Component, Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 #[component(VecStorage)]
 pub struct Hp {
     pub max_hp: f64,

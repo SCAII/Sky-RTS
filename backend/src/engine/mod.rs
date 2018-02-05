@@ -111,7 +111,7 @@ impl<'a, 'b> Rts<'a, 'b> {
 
         // Ensure changes and render
         self.world.maintain();
-        self.out_systems.dispatch(&self.world.res);
+        self.out_systems.dispatch_seq(&self.world.res);
 
         // Build output (VizInit for clearing the screen; Viz for initial display)
         let viz_packet = self.world.read_resource::<Render>().0.clone();
@@ -181,8 +181,8 @@ impl<'a, 'b> Rts<'a, 'b> {
             return Default::default();
         }
 
-        self.sim_systems.dispatch(&self.world.res);
-        self.out_systems.dispatch(&self.world.res);
+        self.sim_systems.dispatch_seq(&self.world.res);
+        self.out_systems.dispatch_seq(&self.world.res);
 
         self.world.maintain();
 

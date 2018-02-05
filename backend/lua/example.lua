@@ -62,7 +62,7 @@ function sky_init()
         damage_deal_reward=0,
         speed=40.0,
         attack_range=1.0,
-        attack_dmg=10,
+        attack_dmg=15,
         attack_delay=1.0,
     }
 
@@ -78,7 +78,7 @@ function sky_init()
         kill_reward=100,
         damage_recv_penalty=0,
         damage_deal_reward=0,
-        attack_range=10.0,
+        attack_range=20.0,
         attack_dmg=1,
         attack_delay=1.5,
     }
@@ -95,8 +95,8 @@ function sky_init()
         kill_reward=1000,
         damage_recv_penalty=0,
         damage_deal_reward=0,
-        attack_range=10.0,
-        attack_dmg=20,
+        attack_range=20.0,
+        attack_dmg=50,
         attack_delay=1.5,
     }
 

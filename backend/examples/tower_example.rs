@@ -119,11 +119,19 @@ fn main() {
         })),
     };
 
-    for _ in 0..100 {
+    for _ in 0..500 {
         rts.process_msg(&empty_action).unwrap();
         let mm = rts.get_messages();
 
         for packet in mm.packets {
+            match packet.dest {
+                Endpoint {
+                    endpoint: Some(End::Agent(..)),
+                } => {
+                    continue;
+                }
+                _ => {}
+            }
             encode_and_send_proto(&mut conn, &packet).unwrap();
         }
 
