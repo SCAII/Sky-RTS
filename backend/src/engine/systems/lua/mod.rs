@@ -122,8 +122,7 @@ impl LuaSystem {
 
     pub fn load_scenario(&mut self, world: &mut World) -> Result<(), Box<Error>> {
         use engine::components::{FactionId, Shape};
-        use engine::resources::{Player, UnitType, UnitTypeMap};
-        use engine::PLAYER_COLORS;
+        use engine::resources::{Player, UnitType, UnitTypeMap, PLAYER_COLORS};
 
         let table: Table = self.lua
             .eval("sky_init()", Some("Initializing in sky_init from Lua"))?;

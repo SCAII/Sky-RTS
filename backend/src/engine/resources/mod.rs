@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use super::FactionId;
-use super::components::{AttackSensor, CollisionHandle, Pos, Shape};
+use super::components::{AttackSensor, CollisionHandle, Color, Pos, Shape};
 
 use scaii_defs::protos::{Action, Viz};
 
@@ -21,8 +21,17 @@ pub const MAX_FACTIONS: usize = 15;
 
 lazy_static! {
     static ref SENSOR_BLACKLIST: Vec<usize> = (MAX_FACTIONS..30).collect();
+
+    pub static ref PLAYER_COLORS: Vec<Color> = vec![
+        Color { r: 0, g: 255, b: 0 },
+        Color { r: 255, g: 0, b: 0 },
+        Color { r: 0, g: 0, b: 255 },
+    ];
 }
-use super::SIXTY_FPS;
+
+// 60FPS emulation since we're not
+// actually measuring time elapsed
+const SIXTY_FPS: f64 = 1.0 / 60.0;
 
 pub(super) fn register_world_resources(world: &mut World) {
     use util;

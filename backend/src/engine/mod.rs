@@ -8,22 +8,10 @@ use scaii_defs::protos::{Action, MultiMessage};
 
 use specs::{Dispatcher, World};
 
-use self::components::{Color, FactionId};
+use self::components::FactionId;
 use self::systems::lua::LuaSystem;
 
 use std::path::PathBuf;
-
-// 60FPS emulation since we're not
-// actually measuring time elapsed
-const SIXTY_FPS: f64 = 1.0 / 60.0;
-
-lazy_static! {
-    static ref PLAYER_COLORS: Vec<Color> = vec![
-        Color { r: 0, g: 255, b: 0 },
-        Color { r: 255, g: 0, b: 0 },
-        Color { r: 0, g: 0, b: 255 },
-    ];
-}
 
 pub struct Rts<'a, 'b> {
     world: World,
