@@ -15,7 +15,7 @@ pub use self::collision::*;
 pub const COLLISION_MARGIN: f64 = 0.02;
 // ncollide wants the average size of a collider to be "around" 1
 // we should probably set this as a resource from Lua in the future
-pub const COLLISION_SCALE: f64 = 50.0;
+pub const COLLISION_SCALE: f64 = 30.0;
 
 pub const MAX_FACTIONS: usize = 15;
 
