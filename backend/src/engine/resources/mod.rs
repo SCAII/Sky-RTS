@@ -19,8 +19,8 @@ pub const COLLISION_SCALE: f64 = 30.0;
 
 pub const MAX_FACTIONS: usize = 15;
 
-pub const STATE_SIZE: usize = 500;
-pub const STATE_SCALE: usize = 1;
+pub const STATE_SIZE: usize = 100;
+pub const STATE_SCALE: usize = 5;
 
 lazy_static! {
     pub static ref SENSOR_BLACKLIST: Vec<usize> = (MAX_FACTIONS..30).collect();

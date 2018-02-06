@@ -91,11 +91,15 @@ impl<'a, 'b> Rts<'a, 'b> {
         use scaii_defs::protos::ScaiiPacket;
         use scaii_defs::protos;
         use shred::RunNow;
+        use self::resources::COLLISION_MARGIN;
 
         if !self.initialized {
             self.init();
             self.initialized = true;
         }
+
+        *self.world.write_resource::<SkyCollisionWorld>() =
+            SkyCollisionWorld::new(COLLISION_MARGIN);
 
         self.world.delete_all();
         // Do a fast reseed so it doesn't start looping the RNG state
