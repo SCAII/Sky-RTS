@@ -10,7 +10,7 @@ class SkyState(State):
         super().__init__(typed_reward, reward, terminal, state, env_state)
 
         id_map = state[:, :, 0].astype(np.int)
-        self.id_list = np.unique(id_map).astype(np.int)
+        self.id_list = np.unique(id_map).astype(np.int)[1:]
         self.id_map = id_map
 
         self.state = np.empty(
@@ -24,7 +24,7 @@ class SkyState(State):
         self.state[:, :, 1:4] = np.equal.outer(unit_ids, np.unique(unit_ids)).astype(np.float)[
             :, :, 1:]
 
-        faction_ids = state[:, :, 2].astype(np.int)
+        faction_ids = state[:, :, 3].astype(np.int)
         self.state[:, :, 4:] = np.equal.outer(
             faction_ids, np.unique(faction_ids)).astype(np.float)[:, :, 1:]
 

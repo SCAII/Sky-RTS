@@ -24,9 +24,9 @@ class MoveList(Action):
             if move[1] == "move":
                 action.move_to.pos = move[2]
             elif move[1] == "attack":
-                action.attack.target_id = move[2] - 1
+                action.attack_unit.target_id = move[2] - 1
             else:
                 raise "Unknown action {}".format(move[1])
 
-        self.env_action = actions.SerializeToString()
-        Action.foo(self, packet)
+        self.env_actions = actions.SerializeToString()
+        super().to_proto(packet)

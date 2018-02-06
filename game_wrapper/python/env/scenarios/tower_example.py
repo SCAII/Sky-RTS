@@ -13,10 +13,12 @@ class TowerAction(MoveList):
 
 class TowerExample(SkyRtsEnv):
     def __init__(self):
-        super().__init__(action_type=MoveList)
+        super().__init__(action_type=TowerAction)
 
         super().load_scenario("tower_example")
 
     def new_action(self):
-        act = super().new_action(self)
+        act = super().new_action()
         act.state = self.state
+
+        return act

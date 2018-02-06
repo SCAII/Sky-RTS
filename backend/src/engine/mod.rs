@@ -17,6 +17,7 @@ pub struct Rts<'a, 'b> {
     world: World,
     pub lua_path: Option<PathBuf>,
     pub initialized: bool,
+    pub render: bool,
 
     sim_systems: Dispatcher<'a, 'b>,
     lua_sys: LuaSystem,
@@ -53,6 +54,7 @@ impl<'a, 'b> Rts<'a, 'b> {
             lua_sys,
             lua_path: None,
             initialized: false,
+            render: false,
             sim_systems: simulation_builder,
             out_systems: output_builder,
         }
@@ -88,6 +90,7 @@ impl<'a, 'b> Rts<'a, 'b> {
         use util;
         use scaii_defs::protos::ScaiiPacket;
         use scaii_defs::protos;
+        use shred::RunNow;
 
         if !self.initialized {
             self.init();
@@ -111,48 +114,52 @@ impl<'a, 'b> Rts<'a, 'b> {
 
         // Ensure changes and render
         self.world.maintain();
+        self.sim_systems.dispatch_seq(&self.world.res);
+        self.lua_sys.run_now(&self.world.res);
         self.out_systems.dispatch_seq(&self.world.res);
-
-        // Build output (VizInit for clearing the screen; Viz for initial display)
-        let viz_packet = self.world.read_resource::<Render>().0.clone();
-
-        let scaii_packet = ScaiiPacket {
-            src: protos::Endpoint {
-                endpoint: Some(protos::endpoint::Endpoint::Backend(
-                    protos::BackendEndpoint {},
-                )),
-            },
-            dest: protos::Endpoint {
-                endpoint: Some(protos::endpoint::Endpoint::Module(protos::ModuleEndpoint {
-                    name: "viz".to_string(),
-                })),
-            },
-            specific_msg: Some(protos::scaii_packet::SpecificMsg::VizInit(
-                protos::VizInit::default(),
-            )),
-        };
 
         let mut mm = MultiMessage {
             packets: Vec::with_capacity(2),
         };
 
-        mm.packets.push(scaii_packet);
+        if self.render {
+            // Build output (VizInit for clearing the screen; Viz for initial display)
+            let viz_packet = self.world.read_resource::<Render>().0.clone();
 
-        let scaii_packet = ScaiiPacket {
-            src: protos::Endpoint {
-                endpoint: Some(protos::endpoint::Endpoint::Backend(
-                    protos::BackendEndpoint {},
+            let scaii_packet = ScaiiPacket {
+                src: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Backend(
+                        protos::BackendEndpoint {},
+                    )),
+                },
+                dest: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Module(protos::ModuleEndpoint {
+                        name: "viz".to_string(),
+                    })),
+                },
+                specific_msg: Some(protos::scaii_packet::SpecificMsg::VizInit(
+                    protos::VizInit::default(),
                 )),
-            },
-            dest: protos::Endpoint {
-                endpoint: Some(protos::endpoint::Endpoint::Module(protos::ModuleEndpoint {
-                    name: "viz".to_string(),
-                })),
-            },
-            specific_msg: Some(protos::scaii_packet::SpecificMsg::Viz(viz_packet)),
-        };
+            };
 
-        mm.packets.push(scaii_packet);
+            mm.packets.push(scaii_packet);
+
+            let scaii_packet = ScaiiPacket {
+                src: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Backend(
+                        protos::BackendEndpoint {},
+                    )),
+                },
+                dest: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Module(protos::ModuleEndpoint {
+                        name: "viz".to_string(),
+                    })),
+                },
+                specific_msg: Some(protos::scaii_packet::SpecificMsg::Viz(viz_packet)),
+            };
+
+            mm.packets.push(scaii_packet);
+        }
 
         let scaii_packet = ScaiiPacket {
             src: protos::Endpoint {
@@ -188,21 +195,26 @@ impl<'a, 'b> Rts<'a, 'b> {
 
         self.world.maintain();
 
-        let render_packet = ScaiiPacket {
-            src: protos::Endpoint {
-                endpoint: Some(protos::endpoint::Endpoint::Backend(
-                    protos::BackendEndpoint {},
+        let mut packets = vec![];
+        if self.render {
+            let render_packet = ScaiiPacket {
+                src: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Backend(
+                        protos::BackendEndpoint {},
+                    )),
+                },
+                dest: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Module(protos::ModuleEndpoint {
+                        name: "viz".to_string(),
+                    })),
+                },
+                specific_msg: Some(protos::scaii_packet::SpecificMsg::Viz(
+                    self.world.read_resource::<Render>().0.clone(),
                 )),
-            },
-            dest: protos::Endpoint {
-                endpoint: Some(protos::endpoint::Endpoint::Module(protos::ModuleEndpoint {
-                    name: "viz".to_string(),
-                })),
-            },
-            specific_msg: Some(protos::scaii_packet::SpecificMsg::Viz(
-                self.world.read_resource::<Render>().0.clone(),
-            )),
-        };
+            };
+
+            packets.push(render_packet);
+        }
 
         let state_packet = ScaiiPacket {
             src: protos::Endpoint {
@@ -218,9 +230,9 @@ impl<'a, 'b> Rts<'a, 'b> {
             )),
         };
 
-        MultiMessage {
-            packets: vec![render_packet, state_packet],
-        }
+        packets.push(state_packet);
+
+        MultiMessage { packets: packets }
     }
 
     pub fn action_input(&mut self, action: Action) {

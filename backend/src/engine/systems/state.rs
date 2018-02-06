@@ -1,6 +1,7 @@
 use specs::{Fetch, FetchMut, ReadStorage, System};
 use engine::components::{FactionId, Hp, UnitTypeTag};
-use engine::resources::{Reward, RtsState, SkyCollisionWorld, Terminal, UnitTypeMap};
+use engine::resources::{Reward, RtsState, SkyCollisionWorld, Terminal, UnitTypeMap, STATE_SCALE,
+                        STATE_SIZE};
 use ndarray::Array3;
 
 #[derive(SystemData)]
@@ -23,7 +24,7 @@ pub struct StateBuildSystem {
 impl StateBuildSystem {
     pub fn new() -> Self {
         StateBuildSystem {
-            state_cache: Array3::zeros([100, 100, 4]),
+            state_cache: Array3::zeros([STATE_SIZE, STATE_SIZE, 4]),
         }
     }
 }
@@ -34,7 +35,7 @@ impl<'a> System<'a> for StateBuildSystem {
     fn run(&mut self, mut sys_data: Self::SystemData) {
         use nalgebra::Point2;
         use ncollide::world::CollisionGroups;
-        use engine::resources::{COLLISION_SCALE, SENSOR_BLACKLIST};
+        use engine::resources::COLLISION_SCALE;
         use std::mem;
 
         let c_world = &*sys_data.collision_sys;
@@ -43,18 +44,17 @@ impl<'a> System<'a> for StateBuildSystem {
         for i in 0..15 {
             c_group.modify_membership(i, true);
         }
-        c_group.set_blacklist(&SENSOR_BLACKLIST);
 
         /* This is probably speed uppable using the Dead and Moved marker components */
-        for i in 0..100 {
-            for j in 0..100 {
+        for i in 0..STATE_SIZE {
+            for j in 0..STATE_SIZE {
                 let pt = Point2::new(
-                    ((i * 5) as f64) / COLLISION_SCALE,
-                    ((j * 5) as f64) / COLLISION_SCALE,
+                    ((i * STATE_SCALE) as f64) / COLLISION_SCALE,
+                    ((j * STATE_SCALE) as f64) / COLLISION_SCALE,
                 );
                 let mut intersection = c_world.interferences_with_point(&pt, &c_group);
 
-                if let Some(collider) = intersection.next() {
+                if let Some(collider) = intersection.filter(|v| !v.data().detector).next() {
                     let entity = collider.data().e;
                     // Need to offset by 1 because the default is 0
                     self.state_cache[(i, j, 0)] = (entity.id() + 1) as f64;
@@ -77,7 +77,7 @@ impl<'a> System<'a> for StateBuildSystem {
         }
 
         let old_state = mem::replace(&mut sys_data.state.0.features, vec![]);
-        let new_cache = Array3::from_shape_vec([100, 100, 4], old_state).unwrap();
+        let new_cache = Array3::from_shape_vec([STATE_SIZE, STATE_SIZE, 4], old_state).unwrap();
 
         sys_data.state.0.features = mem::replace(&mut self.state_cache, new_cache).into_raw_vec();
 

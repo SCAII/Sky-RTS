@@ -21,13 +21,13 @@ class SkyRtsEnv(ScaiiEnv):
 
         if platform.system().lower() == 'windows':
             super().load_backend(
-                os.environ['HOME'] + ".scaii/backends/bin/sky-rts.dll")
+                os.environ['HOME'] + "/.scaii/backends/bin/sky-rts.dll")
         elif platform.system().lower() == 'darwin':
             super().load_backend(
-                os.environ['HOME'] + ".scaii/backends/bin/sky-rts.dylib")
+                os.environ['HOME'] + "/.scaii/backends/bin/sky-rts.dylib")
         elif platform.system().lower() == 'linux':
             super().load_backend(
-                os.environ['HOME'] + ".scaii/backends/bin/libsky-rts.so")
+                os.environ['HOME'] + "/.scaii/backends/bin/libsky-rts.so")
 
     def load_scenario(self, path):
         from ..protos.sky_rts_pb2 import Config

@@ -57,6 +57,8 @@ impl<'a, 'b> Context<'a, 'b> {
         if let Some(ref bytes) = cfg.cfg_msg {
             let cfg = Config::decode(&*bytes)?;
 
+            self.rts.render = cfg.emit_viz.unwrap_or_default();
+
             match cfg.scenario {
                 Some(Scenario { ref path }) => {
                     self.rts.lua_path = Some(PathBuf::from(format!(
@@ -80,11 +82,16 @@ impl<'a, 'b> Module for Context<'a, 'b> {
         use scaii_defs::protos::scaii_packet::SpecificMsg;
         use scaii_defs::protos::Cfg;
         use scaii_defs::protos::cfg::WhichModule;
+        use util;
 
         match packet.specific_msg {
             Some(SpecificMsg::Config(Cfg {
                 which_module: Some(WhichModule::BackendCfg(ref backend_cfg)),
-            })) => self.configure(backend_cfg),
+            })) => {
+                let out = self.configure(backend_cfg);
+                self.awaiting_msgs.push(util::ack_msg());
+                out
+            }
             Some(SpecificMsg::ResetEnv(true)) => {
                 let mm = self.rts.reset();
                 self.awaiting_msgs.push(mm);
@@ -97,7 +104,10 @@ impl<'a, 'b> Module for Context<'a, 'b> {
 
                 Ok(())
             }
-            _ => Err(From::from("Invalid payload received in backend")),
+            _ => Err(From::from(format!(
+                "Invalid payload received in backend: {:?}",
+                packet
+            ))),
         }
     }
 

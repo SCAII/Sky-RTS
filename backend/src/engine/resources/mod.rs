@@ -19,6 +19,9 @@ pub const COLLISION_SCALE: f64 = 30.0;
 
 pub const MAX_FACTIONS: usize = 15;
 
+pub const STATE_SIZE: usize = 500;
+pub const STATE_SCALE: usize = 1;
+
 lazy_static! {
     pub static ref SENSOR_BLACKLIST: Vec<usize> = (MAX_FACTIONS..30).collect();
 
@@ -51,8 +54,8 @@ pub(super) fn register_world_resources(world: &mut World) {
     world.add_resource(ActionInput::default());
     world.add_resource(SkyCollisionWorld::new(COLLISION_MARGIN));
     world.add_resource(RtsState(State {
-        features: Array3::zeros([100, 100, 4]).into_raw_vec(),
-        feature_array_dims: vec![100, 100, 4],
+        features: Array3::zeros([STATE_SIZE, STATE_SIZE, 4]).into_raw_vec(),
+        feature_array_dims: vec![STATE_SIZE as u32, STATE_SIZE as u32, 4],
         ..Default::default()
     }));
     world.add_resource(Reward::default());
@@ -245,7 +248,10 @@ impl UnitType {
                 collider,
                 collider_group,
                 q_type,
-                ColliderData { e: entity },
+                ColliderData {
+                    e: entity,
+                    detector: false,
+                },
             );
 
             let atk_radius = c_world.add(
@@ -253,7 +259,10 @@ impl UnitType {
                 atk_radius,
                 sensor_group,
                 q_type,
-                ColliderData { e: entity },
+                ColliderData {
+                    e: entity,
+                    detector: true,
+                },
             );
 
             (collider, atk_radius)
