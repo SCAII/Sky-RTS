@@ -1,5 +1,6 @@
 use specs::{Entities, FetchMut, Index, ReadStorage, System, WriteStorage};
 use engine::components::{Movable, Move};
+use engine::resources::Skip;
 use engine::ActionInput;
 
 use scaii_defs::protos::Action as ScaiiAction;
@@ -10,6 +11,7 @@ pub struct InputSystemData<'a> {
     input: FetchMut<'a, ActionInput>,
     ids: Entities<'a>,
 
+    skip: FetchMut<'a, Skip>,
     moves: WriteStorage<'a, Move>,
 }
 
@@ -31,9 +33,9 @@ impl<'a> System<'a> for InputSystem {
 
         let actions = mem::replace(&mut sys_data.input.0, None);
 
-        let actions = to_action_list(actions.unwrap_or(Default::default()));
+        let (actions, skip, skip_lua) = to_action_list(actions.unwrap_or(Default::default()));
 
-        // println!("{:?}", actions);
+        *sys_data.skip = Skip(skip, skip_lua);
 
         for action in actions {
             let entity = sys_data.ids.entity(action.unit_id);
@@ -79,7 +81,7 @@ enum ActionTarget {
     Attack(Index),
 }
 
-fn to_action_list(raw: ScaiiAction) -> Vec<Action> {
+fn to_action_list(raw: ScaiiAction) -> (Vec<Action>, bool, Option<String>) {
     use prost::Message;
     use protos::{ActionList, AttackUnit};
     use protos::unit_action::Action as RtsAction;
@@ -91,7 +93,7 @@ fn to_action_list(raw: ScaiiAction) -> Vec<Action> {
     let action: ActionList =
         ActionList::decode(raw.alternate_actions.unwrap()).expect("Could parse inner message");
 
-    action
+    let actions = action
         .actions
         .into_iter()
         .map(|a| Action {
@@ -103,5 +105,7 @@ fn to_action_list(raw: ScaiiAction) -> Vec<Action> {
                 _ => unimplemented!(),
             },
         })
-        .collect()
+        .collect();
+
+    (actions, action.skip.unwrap_or_default(), action.skip_lua)
 }

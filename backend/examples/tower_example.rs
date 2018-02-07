@@ -101,6 +101,7 @@ fn main() {
                 action: Some(Action::AttackUnit(AttackUnit { target_id: 1 })),
             },
         ],
+        ..Default::default()
     };
 
     let mut buf = Vec::new();

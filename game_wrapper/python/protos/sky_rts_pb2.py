@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='sky-rts.proto',
   package='scaii.rts',
   syntax='proto2',
-  serialized_pb=_b('\n\rsky-rts.proto\x12\tscaii.rts\"4\n\nActionList\x12&\n\x07\x61\x63tions\x18\x01 \x03(\x0b\x32\x15.scaii.rts.UnitAction\"{\n\nUnitAction\x12\x0f\n\x07unit_id\x18\x01 \x02(\x04\x12$\n\x07move_to\x18\x02 \x01(\x0b\x32\x11.scaii.rts.MoveToH\x00\x12,\n\x0b\x61ttack_unit\x18\x03 \x01(\x0b\x32\x15.scaii.rts.AttackUnitH\x00\x42\x08\n\x06\x61\x63tion\"\x1b\n\x03Pos\x12\t\n\x01x\x18\x01 \x02(\x01\x12\t\n\x01y\x18\x02 \x02(\x01\"%\n\x06MoveTo\x12\x1b\n\x03pos\x18\x01 \x02(\x0b\x32\x0e.scaii.rts.Pos\"\x1f\n\nAttackUnit\x12\x11\n\ttarget_id\x18\x01 \x02(\r\"V\n\x0bStateUpdate\x12\x1e\n\x05units\x18\x01 \x03(\x0b\x32\x0f.scaii.rts.Unit\x12\'\n\nunit_types\x18\x02 \x03(\x0b\x32\x13.scaii.rts.UnitType\"P\n\x08UnitType\x12\x14\n\x0cunit_type_id\x18\x01 \x02(\x04\x12\x0e\n\x06max_hp\x18\x02 \x01(\x01\x12\x0f\n\x07movable\x18\x03 \x01(\x01\x12\r\n\x03tag\x18\x04 \x01(\t:\x00\"x\n\x04Unit\x12\n\n\x02id\x18\x01 \x02(\r\x12\x10\n\x08owner_id\x18\x02 \x01(\x04\x12\x14\n\x0cunit_type_id\x18\x03 \x01(\x04\x12 \n\x03pos\x18\x04 \x01(\x0b\x32\x13.scaii.rts.DeltaPos\x12\n\n\x02hp\x18\x05 \x01(\x01\x12\x0e\n\x06\x64\x65lete\x18\n \x02(\x08\" \n\x08\x44\x65ltaPos\x12\t\n\x01x\x18\x01 \x01(\x01\x12\t\n\x01y\x18\x02 \x01(\x01\"g\n\x06\x43onfig\x12%\n\x08scenario\x18\x01 \x01(\x0b\x32\x13.scaii.rts.Scenario\x12\x10\n\x08\x65mit_viz\x18\x02 \x01(\x08\x12$\n\x0brandom_seed\x18\x03 \x01(\x0b\x32\x0f.scaii.rts.Seed\"\x14\n\x04Seed\x12\x0c\n\x04seed\x18\x01 \x03(\x04\"\x18\n\x08Scenario\x12\x0c\n\x04path\x18\x01 \x02(\t')
+  serialized_pb=_b('\n\rsky-rts.proto\x12\tscaii.rts\"T\n\nActionList\x12&\n\x07\x61\x63tions\x18\x01 \x03(\x0b\x32\x15.scaii.rts.UnitAction\x12\x0c\n\x04skip\x18\x02 \x01(\x08\x12\x10\n\x08skip_lua\x18\x03 \x01(\t\"{\n\nUnitAction\x12\x0f\n\x07unit_id\x18\x01 \x02(\x04\x12$\n\x07move_to\x18\x02 \x01(\x0b\x32\x11.scaii.rts.MoveToH\x00\x12,\n\x0b\x61ttack_unit\x18\x03 \x01(\x0b\x32\x15.scaii.rts.AttackUnitH\x00\x42\x08\n\x06\x61\x63tion\"\x1b\n\x03Pos\x12\t\n\x01x\x18\x01 \x02(\x01\x12\t\n\x01y\x18\x02 \x02(\x01\"%\n\x06MoveTo\x12\x1b\n\x03pos\x18\x01 \x02(\x0b\x32\x0e.scaii.rts.Pos\"\x1f\n\nAttackUnit\x12\x11\n\ttarget_id\x18\x01 \x02(\r\"V\n\x0bStateUpdate\x12\x1e\n\x05units\x18\x01 \x03(\x0b\x32\x0f.scaii.rts.Unit\x12\'\n\nunit_types\x18\x02 \x03(\x0b\x32\x13.scaii.rts.UnitType\"P\n\x08UnitType\x12\x14\n\x0cunit_type_id\x18\x01 \x02(\x04\x12\x0e\n\x06max_hp\x18\x02 \x01(\x01\x12\x0f\n\x07movable\x18\x03 \x01(\x01\x12\r\n\x03tag\x18\x04 \x01(\t:\x00\"x\n\x04Unit\x12\n\n\x02id\x18\x01 \x02(\r\x12\x10\n\x08owner_id\x18\x02 \x01(\x04\x12\x14\n\x0cunit_type_id\x18\x03 \x01(\x04\x12 \n\x03pos\x18\x04 \x01(\x0b\x32\x13.scaii.rts.DeltaPos\x12\n\n\x02hp\x18\x05 \x01(\x01\x12\x0e\n\x06\x64\x65lete\x18\n \x02(\x08\" \n\x08\x44\x65ltaPos\x12\t\n\x01x\x18\x01 \x01(\x01\x12\t\n\x01y\x18\x02 \x01(\x01\"g\n\x06\x43onfig\x12%\n\x08scenario\x18\x01 \x01(\x0b\x32\x13.scaii.rts.Scenario\x12\x10\n\x08\x65mit_viz\x18\x02 \x01(\x08\x12$\n\x0brandom_seed\x18\x03 \x01(\x0b\x32\x0f.scaii.rts.Seed\"\x14\n\x04Seed\x12\x0c\n\x04seed\x18\x01 \x03(\x04\"\x18\n\x08Scenario\x12\x0c\n\x04path\x18\x01 \x02(\t')
 )
 
 
@@ -39,6 +39,20 @@ _ACTIONLIST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='skip', full_name='scaii.rts.ActionList.skip', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='skip_lua', full_name='scaii.rts.ActionList.skip_lua', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -52,7 +66,7 @@ _ACTIONLIST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=28,
-  serialized_end=80,
+  serialized_end=112,
 )
 
 
@@ -99,8 +113,8 @@ _UNITACTION = _descriptor.Descriptor(
       name='action', full_name='scaii.rts.UnitAction.action',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=82,
-  serialized_end=205,
+  serialized_start=114,
+  serialized_end=237,
 )
 
 
@@ -137,8 +151,8 @@ _POS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=207,
-  serialized_end=234,
+  serialized_start=239,
+  serialized_end=266,
 )
 
 
@@ -168,8 +182,8 @@ _MOVETO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=236,
-  serialized_end=273,
+  serialized_start=268,
+  serialized_end=305,
 )
 
 
@@ -199,8 +213,8 @@ _ATTACKUNIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=275,
-  serialized_end=306,
+  serialized_start=307,
+  serialized_end=338,
 )
 
 
@@ -237,8 +251,8 @@ _STATEUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=308,
-  serialized_end=394,
+  serialized_start=340,
+  serialized_end=426,
 )
 
 
@@ -289,8 +303,8 @@ _UNITTYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=396,
-  serialized_end=476,
+  serialized_start=428,
+  serialized_end=508,
 )
 
 
@@ -355,8 +369,8 @@ _UNIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=478,
-  serialized_end=598,
+  serialized_start=510,
+  serialized_end=630,
 )
 
 
@@ -393,8 +407,8 @@ _DELTAPOS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=600,
-  serialized_end=632,
+  serialized_start=632,
+  serialized_end=664,
 )
 
 
@@ -438,8 +452,8 @@ _CONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=634,
-  serialized_end=737,
+  serialized_start=666,
+  serialized_end=769,
 )
 
 
@@ -469,8 +483,8 @@ _SEED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=739,
-  serialized_end=759,
+  serialized_start=771,
+  serialized_end=791,
 )
 
 
@@ -500,8 +514,8 @@ _SCENARIO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=761,
-  serialized_end=785,
+  serialized_start=793,
+  serialized_end=817,
 )
 
 _ACTIONLIST.fields_by_name['actions'].message_type = _UNITACTION

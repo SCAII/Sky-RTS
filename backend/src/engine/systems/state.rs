@@ -1,7 +1,7 @@
 use specs::{Fetch, FetchMut, ReadStorage, System};
 use engine::components::{FactionId, Hp, UnitTypeTag};
-use engine::resources::{Reward, RtsState, SkyCollisionWorld, Terminal, UnitTypeMap, STATE_SCALE,
-                        STATE_SIZE};
+use engine::resources::{Reward, RtsState, Skip, SkyCollisionWorld, Terminal, UnitTypeMap,
+                        STATE_SCALE, STATE_SIZE};
 use ndarray::Array3;
 
 #[derive(SystemData)]
@@ -12,6 +12,7 @@ pub struct StateBuildSystemData<'a> {
     tag: ReadStorage<'a, UnitTypeTag>,
     unit_types: Fetch<'a, UnitTypeMap>,
     terminal: Fetch<'a, Terminal>,
+    skip: Fetch<'a, Skip>,
 
     state: FetchMut<'a, RtsState>,
     reward: FetchMut<'a, Reward>,
@@ -37,6 +38,10 @@ impl<'a> System<'a> for StateBuildSystem {
         use ncollide::world::CollisionGroups;
         use engine::resources::COLLISION_SCALE;
         use std::mem;
+
+        if sys_data.skip.0 {
+            return;
+        }
 
         let c_world = &*sys_data.collision_sys;
 
@@ -82,6 +87,7 @@ impl<'a> System<'a> for StateBuildSystem {
         sys_data.state.0.features = mem::replace(&mut self.state_cache, new_cache).into_raw_vec();
 
         mem::swap(&mut sys_data.state.0.typed_reward, &mut sys_data.reward.0);
+        sys_data.reward.0.clear();
         sys_data.state.0.terminal = sys_data.terminal.0;
 
         sys_data.state.0.reward = Some(

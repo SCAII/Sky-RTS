@@ -8,7 +8,7 @@ use std::path::Path;
 use std::fmt::Debug;
 
 use engine::components::{Death, FactionId, UnitTypeTag};
-use engine::resources::{Reward, Terminal, UnitTypeMap};
+use engine::resources::{Reward, Skip, Terminal, UnitTypeMap};
 
 pub(crate) mod userdata;
 
@@ -20,6 +20,7 @@ pub struct LuaSystemData<'a> {
 
     unit_type: Fetch<'a, UnitTypeMap>,
 
+    skip: FetchMut<'a, Skip>,
     reward: FetchMut<'a, Reward>,
     terminal: FetchMut<'a, Terminal>,
 }
@@ -35,7 +36,7 @@ impl<'a> System<'a> for LuaSystem {
 
     fn run(&mut self, mut sys_data: Self::SystemData) {
         use specs::Join;
-        use self::userdata::{UserDataUnit, UserDataWorld};
+        use self::userdata::{UserDataReadWorld, UserDataUnit, UserDataWorld};
 
         sys_data.reward.0.clear();
 
@@ -75,6 +76,20 @@ impl<'a> System<'a> for LuaSystem {
         let world: UserDataWorld = self.lua.globals().get("__sky_world").unwrap();
         if world.victory.is_some() {
             sys_data.terminal.0 = true;
+        }
+
+        if sys_data.skip.0 {
+            if sys_data.terminal.0 {
+                *sys_data.skip = Skip(false, None);
+            } else if let Some(ref src) = sys_data.skip.1 {
+                self.lua
+                    .globals()
+                    .set("__sky_read_world", UserDataReadWorld)
+                    .unwrap();
+                self.lua
+                    .exec::<()>(src, Some("Skip lua"))
+                    .expect("Could not execute lua to skip current state");
+            }
         }
     }
 }

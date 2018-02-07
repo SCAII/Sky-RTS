@@ -19,6 +19,8 @@ package scaii.rts;
 // etc).
 message ActionList {
     repeated UnitAction actions = 1;
+    optional bool skip = 2;
+    optional string skip_lua = 3;
 }
 
 // A basic action issued to a unit

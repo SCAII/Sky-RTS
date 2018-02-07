@@ -35,6 +35,11 @@ impl UserData for UserDataWorld {
 }
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Debug)]
+pub struct UserDataReadWorld;
+
+impl UserData for UserDataReadWorld {}
+
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Debug)]
 pub struct UserDataUnit {
     pub faction: FactionId,
 }

@@ -59,6 +59,7 @@ pub(super) fn register_world_resources(world: &mut World) {
         ..Default::default()
     }));
     world.add_resource(Reward::default());
+    world.add_resource(Skip(false, None));
 }
 
 #[derive(Default, Debug, Clone, PartialEq)]
@@ -98,6 +99,9 @@ pub struct ActionInput(pub Option<Action>);
 
 #[derive(PartialEq, Default, Clone)]
 pub struct Reward(pub HashMap<String, f64>);
+
+#[derive(Eq, PartialEq, Default, Clone, Debug, Hash)]
+pub struct Skip(pub bool, pub Option<String>);
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct UnitType {

@@ -99,9 +99,15 @@ impl<'a, 'b> Module for Context<'a, 'b> {
             }
             Some(SpecificMsg::Action(ref action)) => {
                 self.rts.action_input(action.clone());
-                let mm = self.rts.update();
-                self.awaiting_msgs.push(mm);
+                let mut mm = self.rts.update();
 
+                self.rts.action_input(Default::default());
+
+                while self.rts.skip() {
+                    mm = self.rts.update();
+                }
+
+                self.awaiting_msgs.push(mm);
                 Ok(())
             }
             _ => Err(From::from(format!(

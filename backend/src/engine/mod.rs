@@ -184,6 +184,11 @@ impl<'a, 'b> Rts<'a, 'b> {
         mm
     }
 
+    pub fn skip(&self) -> bool {
+        use self::resources::Skip;
+        self.world.read_resource::<Skip>().0
+    }
+
     pub fn update(&mut self) -> MultiMessage {
         use scaii_defs::protos;
         use scaii_defs::protos::ScaiiPacket;

@@ -10,6 +10,9 @@ class TowerAction(MoveList):
         super().move_unit(
             self.state.id_list[0], "attack", self.state.id_list[quadrant])
 
+    def to_proto(self, packet, skip=True):
+        super().to_proto(packet, skip, skip_lua=None)
+
 
 class TowerExample(SkyRtsEnv):
     def __init__(self):

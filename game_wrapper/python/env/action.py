@@ -12,10 +12,14 @@ class MoveList(Action):
     def move_unit(self, unit_id, action, target):
         self.move_list.append((unit_id, action, target))
 
-    def to_proto(self, packet):
+    def to_proto(self, packet, skip=False, skip_lua=None):
         from ..protos.sky_rts_pb2 import ActionList
 
         actions = ActionList()
+
+        actions.skip = skip
+        if not skip_lua is None:
+            actions.skip_lua = skip_lua
 
         for move in self.move_list:
             action = actions.actions.add()

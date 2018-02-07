@@ -1,6 +1,7 @@
 use specs::{Entities, Fetch, FetchMut, Join, ReadStorage, System};
 use engine::components::{Color, Death, MovedFlag, Pos, Shape};
 use engine::{NeedsKeyInfo, Render};
+use engine::resources::Skip;
 
 use scaii_defs::protos::Entity as ScaiiEntity;
 
@@ -13,6 +14,7 @@ pub struct RenderSystemData<'a> {
     moved: ReadStorage<'a, MovedFlag>,
     death: ReadStorage<'a, Death>,
     ids: Entities<'a>,
+    skip: Fetch<'a, Skip>,
 
     out: FetchMut<'a, Render>,
 }
@@ -24,6 +26,9 @@ impl<'a> System<'a> for RenderSystem {
     type SystemData = RenderSystemData<'a>;
 
     fn run(&mut self, sys_data: Self::SystemData) {
+        if sys_data.skip.0 {
+            return;
+        }
         if sys_data.complete_rerender.0 {
             self.render_all(sys_data);
         } else {
