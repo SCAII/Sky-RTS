@@ -496,6 +496,26 @@ impl<'a, 'b> Rts<'a, 'b> {
                 )),
             };
             packets.push(scaii_packet);
+
+            self.out_systems.dispatch(&self.world.res);
+
+            let render_packet = ScaiiPacket {
+                src: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Backend(
+                        protos::BackendEndpoint {},
+                    )),
+                },
+                dest: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Module(protos::ModuleEndpoint {
+                        name: "viz".to_string(),
+                    })),
+                },
+                specific_msg: Some(protos::scaii_packet::SpecificMsg::Viz(
+                    self.world.read_resource::<Render>().0.clone(),
+                )),
+            };
+
+            packets.push(render_packet);
         }
 
         MultiMessage { packets }
