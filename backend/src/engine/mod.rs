@@ -467,7 +467,8 @@ impl<'a, 'b> Rts<'a, 'b> {
     /// Deserializes the world from raw bytes, as well as
     /// recalculating anything like collision that cannot be
     /// serialized.
-    pub fn deserialize(&mut self, buf: Vec<u8>) {
+    pub fn deserialize(&mut self, buf: Vec<u8>) -> MultiMessage {
+        use scaii_defs::protos;
         self.world.write_resource::<SerializeBytes>().0 = buf;
 
         self.de_system.run_now(&self.world.res);
@@ -476,6 +477,28 @@ impl<'a, 'b> Rts<'a, 'b> {
         self.world.write_resource::<NeedsKeyInfo>().0 = true;
 
         self.init();
+
+        let mut packets = Vec::with_capacity(1);
+        if self.render {
+            let scaii_packet = ScaiiPacket {
+                src: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Backend(
+                        protos::BackendEndpoint {},
+                    )),
+                },
+                dest: protos::Endpoint {
+                    endpoint: Some(protos::endpoint::Endpoint::Module(protos::ModuleEndpoint {
+                        name: "viz".to_string(),
+                    })),
+                },
+                specific_msg: Some(protos::scaii_packet::SpecificMsg::VizInit(
+                    protos::VizInit::default(),
+                )),
+            };
+            packets.push(scaii_packet);
+        }
+
+        MultiMessage { packets }
     }
 
     /// Sets whether to emit visualization messages.
