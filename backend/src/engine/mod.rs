@@ -469,6 +469,7 @@ impl<'a, 'b> Rts<'a, 'b> {
     /// serialized.
     pub fn deserialize(&mut self, buf: Vec<u8>) -> MultiMessage {
         use scaii_defs::protos;
+        self.initialized = false;
         self.world.write_resource::<SerializeBytes>().0 = buf;
 
         self.de_system.run_now(&self.world.res);
