@@ -401,6 +401,7 @@ impl<'a, 'b> Rts<'a, 'b> {
         self.world.write_resource::<Step>().0 += 1;
 
         self.world.maintain();
+        self.last_action = Default::default();
 
         if self.skip() {
             return mm;
