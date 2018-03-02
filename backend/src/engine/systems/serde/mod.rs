@@ -24,7 +24,6 @@ type SerComponents = (
     Static,
     Move,
     Pos,
-    MovedFlag,
     Hp,
     Color,
     Shape,
